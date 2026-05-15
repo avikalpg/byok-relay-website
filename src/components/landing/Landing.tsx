@@ -1,4 +1,5 @@
-import { Github, ArrowRight, Check, X, AlertTriangle, Terminal, KeyRound, Shield, Zap, Lock, Server, Activity } from "lucide-react";
+import { useState } from "react";
+import { Github, ArrowRight, Check, X, AlertTriangle, Terminal, KeyRound, Shield, Zap, Lock, Server, Activity, MessageSquareCode, Cloud, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
@@ -252,6 +253,7 @@ function CodeBlock({ children, language = "bash" }: { children: string; language
 }
 
 function Quickstart() {
+  const [mode, setMode] = useState<"dev" | "vibe">("dev");
   return (
     <section id="quickstart" className="border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-24 md:py-32">
@@ -263,8 +265,9 @@ function Quickstart() {
               <span className="font-display font-normal italic text-signal">60 seconds.</span>
             </h2>
             <p className="mt-6 text-base leading-relaxed text-muted-foreground">
-              Single Node.js process. SQLite. No Docker compose, no Kubernetes, no managed services.
+              Pick the path that matches how you built your app. No setup is more than a copy-paste away.
             </p>
+
             <div className="mt-8 rounded-lg border border-signal/30 bg-signal/[0.06] p-5">
               <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-signal">
                 <Zap className="h-3 w-3" /> hosted option
@@ -278,11 +281,59 @@ function Quickstart() {
               </p>
             </div>
           </div>
-          <CodeBlock>{`git clone https://github.com/avikalpg/byok-relay.git
+
+          <div>
+            <div className="mb-4 flex gap-1 rounded-lg border border-border bg-card p-1">
+              <button
+                onClick={() => setMode("dev")}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 font-mono text-xs transition-colors ${
+                  mode === "dev" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Terminal className="h-3.5 w-3.5" /> Developer
+              </button>
+              <button
+                onClick={() => setMode("vibe")}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 font-mono text-xs transition-colors ${
+                  mode === "vibe" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <MessageSquareCode className="h-3.5 w-3.5" /> Vibe Coder
+              </button>
+            </div>
+
+            {mode === "dev" && (
+              <CodeBlock>{`git clone https://github.com/avikalpg/byok-relay.git
 cd byok-relay && npm install
 echo "ENCRYPTION_SECRET=$(openssl rand -hex 32)" > .env
 echo "ALLOWED_ORIGINS=https://your-app.com" >> .env
 npm start`}</CodeBlock>
+            )}
+
+            {mode === "vibe" && (
+              <CodeBlock language="prompt">{`Read the byok-relay integration guide at:
+https://byokrelay.com/skill
+
+Then integrate byok-relay into this project
+using the hosted relay at https://relay.byokrelay.com`}</CodeBlock>
+            )}
+
+            {mode === "vibe" && (
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                Built on <span className="text-foreground">Lovable</span>,{" "}
+                <span className="text-foreground">Bolt</span>,{" "}
+                <span className="text-foreground">Replit</span>,{" "}
+                <span className="text-foreground">v0</span>,{" "}
+                <span className="text-foreground">Emergent</span>,{" "}
+                <span className="text-foreground">Google AI Studio</span>,{" "}
+                <span className="text-foreground">rocket.new</span>,{" "}
+                <span className="text-foreground">Claude cowork</span>,{" "}
+                <span className="text-foreground">Codex</span> — or any agent-powered builder?{" "}
+                <span className="text-foreground">You don't need a terminal.</span>{" "}
+                Just paste the prompt above into your AI assistant. It will read the skill, wire the integration, and deploy — no commands needed.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </section>
@@ -478,12 +529,31 @@ function Deploy() {
             <p className="text-sm leading-relaxed text-muted-foreground">
               Single Node.js process + SQLite. Deploy on any VPS, Railway, Fly.io, or your own server. Zero vendor lock-in.
             </p>
-            <div className="mt-auto pt-2">
-              <Button asChild variant="outline" className="h-11 gap-2 border-foreground/20">
-                <a href="https://vercel.com/new/clone?repository-url=https://github.com/avikalpg/byok-relay" target="_blank" rel="noreferrer">
-                  Deploy on Vercel <ArrowRight className="h-4 w-4" />
-                </a>
-              </Button>
+
+            <div className="mt-auto flex flex-col gap-4 pt-2">
+              <div className="flex flex-wrap gap-3">
+                <Button asChild variant="outline" className="h-11 gap-2 border-foreground/20">
+                  <a href="https://vercel.com/new/clone?repository-url=https://github.com/avikalpg/byok-relay" target="_blank" rel="noreferrer">
+                    <Cloud className="h-4 w-4" /> Deploy on Vercel
+                  </a>
+                </Button>
+                <Button asChild variant="outline" className="h-11 gap-2 border-foreground/20">
+                  <a href="https://railway.app/new/template?template=https://github.com/avikalpg/byok-relay" target="_blank" rel="noreferrer">
+                    <Rocket className="h-4 w-4" /> Railway
+                  </a>
+                </Button>
+                <Button asChild variant="outline" className="h-11 gap-2 border-foreground/20">
+                  <a href="https://fly.io/launch?repo=https://github.com/avikalpg/byok-relay" target="_blank" rel="noreferrer">
+                    <Rocket className="h-4 w-4" /> Fly.io
+                  </a>
+                </Button>
+              </div>
+              <p className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-signal" />
+                <span>
+                  <span className="text-foreground">Vercel caveat:</span> SQLite data is ephemeral on Vercel's serverless platform — fine for demos, not for production. Use Railway or Fly.io for persistent storage, or connect to a managed PostgreSQL database.
+                </span>
+              </p>
             </div>
           </div>
           <div className="relative flex flex-col gap-6 bg-foreground p-8 text-background md:p-10">
