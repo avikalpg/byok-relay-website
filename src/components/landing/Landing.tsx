@@ -1,4 +1,5 @@
-import { Github, ArrowRight, Check, X, AlertTriangle, Terminal, KeyRound, Shield, Zap, Lock, Server, Activity } from "lucide-react";
+import { useState } from "react";
+import { Github, ArrowRight, Check, X, AlertTriangle, Terminal, KeyRound, Shield, Zap, Lock, Server, Activity, MessageSquareCode, Cloud, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
