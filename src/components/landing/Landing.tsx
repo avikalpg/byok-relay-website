@@ -529,12 +529,31 @@ function Deploy() {
             <p className="text-sm leading-relaxed text-muted-foreground">
               Single Node.js process + SQLite. Deploy on any VPS, Railway, Fly.io, or your own server. Zero vendor lock-in.
             </p>
-            <div className="mt-auto pt-2">
-              <Button asChild variant="outline" className="h-11 gap-2 border-foreground/20">
-                <a href="https://vercel.com/new/clone?repository-url=https://github.com/avikalpg/byok-relay" target="_blank" rel="noreferrer">
-                  Deploy on Vercel <ArrowRight className="h-4 w-4" />
-                </a>
-              </Button>
+
+            <div className="mt-auto flex flex-col gap-4 pt-2">
+              <div className="flex flex-wrap gap-3">
+                <Button asChild variant="outline" className="h-11 gap-2 border-foreground/20">
+                  <a href="https://vercel.com/new/clone?repository-url=https://github.com/avikalpg/byok-relay" target="_blank" rel="noreferrer">
+                    <Cloud className="h-4 w-4" /> Deploy on Vercel
+                  </a>
+                </Button>
+                <Button asChild variant="outline" className="h-11 gap-2 border-foreground/20">
+                  <a href="https://railway.app/new/template?template=https://github.com/avikalpg/byok-relay" target="_blank" rel="noreferrer">
+                    <Rocket className="h-4 w-4" /> Railway
+                  </a>
+                </Button>
+                <Button asChild variant="outline" className="h-11 gap-2 border-foreground/20">
+                  <a href="https://fly.io/launch?repo=https://github.com/avikalpg/byok-relay" target="_blank" rel="noreferrer">
+                    <Rocket className="h-4 w-4" /> Fly.io
+                  </a>
+                </Button>
+              </div>
+              <p className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-signal" />
+                <span>
+                  <span className="text-foreground">Vercel caveat:</span> SQLite data is ephemeral on Vercel's serverless platform — fine for demos, not for production. Use Railway or Fly.io for persistent storage, or connect to a managed PostgreSQL database.
+                </span>
+              </p>
             </div>
           </div>
           <div className="relative flex flex-col gap-6 bg-foreground p-8 text-background md:p-10">
