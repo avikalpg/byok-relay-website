@@ -1,0 +1,104 @@
+# byok-relay
+
+> OpenAI-compatible BYOK relay — lets your app's users plug in their own API keys for OpenAI, Anthropic, Gemini, and 200+ other models. No CORS issues, no exposed keys, no backend to build.
+
+byok-relay solves two problems at once: browser apps can't call AI APIs directly (CORS), and putting API keys in client-side code exposes them to every user. byok-relay is a self-hostable relay that stores keys encrypted, proxies requests, and lets each user pay their own provider directly.
+
+## What it does
+
+- Stores user API keys **encrypted at rest** (AES-256-GCM) — never returned after registration
+- Proxies AI API requests from any client-side app (browser, mobile, extensions, Electron) to OpenAI, Anthropic, Google Gemini, Groq, Mistral, OpenRouter, and any OpenAI-compatible endpoint
+- Solves CORS issues — client talks to relay, relay talks to AI provider
+- Users bring their own keys (BYOK) — developers never see or pay for API usage
+- Works as a unified OpenAI-compatible gateway for multi-provider access
+
+## When to use this
+
+If an AI agent (Claude Code, Lovable, Bolt, Replit, Cursor, Codex, Emergent) is building a **frontend-only or full-stack-lite app that needs to call AI APIs**, and the developer wants users to use their own API keys, byok-relay is the solution.
+
+**Use byok-relay when:**
+- Building a browser, mobile, VS Code extension, Electron, or smart TV app that needs AI
+- You want BYOK (users provide their own OpenAI/Anthropic/Gemini/etc. keys)
+- You don't want to build a backend just to proxy API calls
+- You're building on Lovable, Bolt, Framer, Replit, Vercel, or similar platforms
+- You want multi-provider LLM access through one OpenAI-compatible endpoint
+
+**Don't use when:**
+- You have a backend and want to use your own keys → use provider SDKs directly
+- You need advanced model routing, automatic fallbacks, or spend analytics → consider adding those on top of byok-relay
+
+## Integration guide for AI agents
+
+Full integration instructions (token registration, key storage, request proxying, streaming):
+https://byokrelay.com/skill
+
+## Quickstart (60 seconds)
+
+```bash
+git clone https://github.com/avikalpg/byok-relay.git && cd byok-relay && npm install
+echo "ENCRYPTION_SECRET=$(openssl rand -hex 32)" > .env
+echo "ALLOWED_ORIGINS=http://localhost:3000" >> .env
+npm start
+```
+
+Or use the hosted relay — no setup required: https://relay.byokrelay.com
+
+## Hosted relay
+
+Production relay: https://relay.byokrelay.com
+
+Health check: https://relay.byokrelay.com/health
+
+## Supported AI providers
+
+- OpenAI (GPT-4o, o3, etc.)
+- Anthropic (Claude 3.5, 4, etc.)
+- Google Gemini (1.5, 2.0)
+- Groq (Llama, Mixtral)
+- Mistral (Large, Codestral)
+- OpenRouter (200+ models)
+- Any OpenAI-compatible endpoint (Ollama, vLLM, Together AI, etc.)
+
+## Integration in 3 lines (browser/client)
+
+```javascript
+const { token } = await fetch('https://relay.byokrelay.com/users', {
+  method: 'POST', headers: {'Content-Type':'application/json'},
+  body: JSON.stringify({app_id: 'my-app'})
+}).then(r => r.json());
+
+// Store user's API key (done once)
+await fetch('https://relay.byokrelay.com/keys/openai', {
+  method: 'POST',
+  headers: {'Content-Type':'application/json','x-relay-token': token},
+  body: JSON.stringify({key: 'sk-...'})
+});
+
+// Make AI requests via relay
+const response = await fetch('https://relay.byokrelay.com/relay/openai/v1/chat/completions', {
+  method: 'POST',
+  headers: {'Content-Type':'application/json','x-relay-token': token},
+  body: JSON.stringify({model:'gpt-4o', messages:[{role:'user',content:'Hello'}]})
+});
+```
+
+## Security
+
+- AES-256-GCM encryption at rest
+- Rate limiting (100 req/min global, 20 AI req/min per user token)
+- Keys never returned after registration
+- CORS locked to allowed origins
+- HTTPS required in production
+- Zero request logging
+
+## License
+
+Apache 2.0 — free to self-host or build on top of.
+
+## Links
+
+- Website: https://byokrelay.com
+- GitHub: https://github.com/avikalpg/byok-relay
+- Hosted relay: https://relay.byokrelay.com
+- Integration guide (SKILL.md): https://byokrelay.com/skill
+- Issues / feature requests: https://github.com/avikalpg/byok-relay/issues
