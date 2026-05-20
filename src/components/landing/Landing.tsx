@@ -14,11 +14,11 @@ const GH_URL = "https://github.com/avikalpg/byok-relay";
 function Logo({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className="relative grid h-7 w-7 place-items-center rounded-md border border-foreground/15 bg-foreground text-background">
-        <span className="absolute -left-px top-1/2 h-px w-2 -translate-y-1/2 bg-signal" />
-        <span className="absolute -right-px top-1/2 h-px w-2 -translate-y-1/2 bg-signal" />
-        <span className="h-2 w-2 rounded-full bg-signal signal-dot" />
-      </div>
+      <img 
+        src="/logo.svg" 
+        alt="byok-relay logo" 
+        className="h-7 w-7"
+      />
       <span className="font-mono text-[15px] font-medium tracking-tight">
         byok<span className="text-muted-foreground">-</span>relay
       </span>
