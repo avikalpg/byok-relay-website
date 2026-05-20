@@ -322,17 +322,7 @@ using the hosted relay at https://relay.byokrelay.com`}</CodeBlock>
 
             {mode === "vibe" && (
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Built on <span className="text-foreground">Lovable</span>,{" "}
-                <span className="text-foreground">Bolt</span>,{" "}
-                <span className="text-foreground">Replit</span>,{" "}
-                <span className="text-foreground">v0</span>,{" "}
-                <span className="text-foreground">Emergent</span>,{" "}
-                <span className="text-foreground">Google AI Studio</span>,{" "}
-                <span className="text-foreground">rocket.new</span>,{" "}
-                <span className="text-foreground">Claude cowork</span>,{" "}
-                <span className="text-foreground">Codex</span> — or any agent-powered builder?{" "}
-                <span className="text-foreground">You don't need a terminal.</span>{" "}
-                Just paste the prompt above into your AI assistant. It will read the skill, wire the integration, and deploy — no commands needed.
+                No terminal needed. Paste the prompt above into your AI coding assistant — it will read the integration guide, wire up byok-relay, and deploy automatically.
               </p>
             )}
           </div>
