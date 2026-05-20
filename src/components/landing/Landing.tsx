@@ -303,11 +303,13 @@ function Quickstart() {
             </div>
 
             {mode === "dev" && (
-              <CodeBlock>{`git clone https://github.com/avikalpg/byok-relay.git
-cd byok-relay && npm install
-echo "ENCRYPTION_SECRET=$(openssl rand -hex 32)" > .env
-echo "ALLOWED_ORIGINS=https://your-app.com" >> .env
-npm start`}</CodeBlock>
+              <>
+                <CodeBlock>{`npx byok-relay`}</CodeBlock>
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                  Starts a local relay in seconds — no install needed. For self-hosting, manual setup, or deployment options,{" "}
+                  <a href="https://github.com/avikalpg/byok-relay#readme" className="text-foreground underline decoration-signal decoration-2 underline-offset-4" target="_blank" rel="noreferrer">see the README →</a>
+                </p>
+              </>
             )}
 
             {mode === "vibe" && (
