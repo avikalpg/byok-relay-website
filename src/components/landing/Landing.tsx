@@ -253,7 +253,7 @@ function CodeBlock({ children, language = "bash" }: { children: string; language
 }
 
 function Quickstart() {
-  const [mode, setMode] = useState<"dev" | "vibe">("dev");
+  const [mode, setMode] = useState<"dev" | "vibe">("vibe");
   return (
     <section id="quickstart" className="border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-24 md:py-32">
@@ -285,20 +285,20 @@ function Quickstart() {
           <div>
             <div className="mb-4 flex gap-1 rounded-lg border border-border bg-card p-1">
               <button
+                onClick={() => setMode("vibe")}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 font-mono text-xs transition-colors ${
+                  mode === "vibe" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <MessageSquareCode className="h-3.5 w-3.5" /> AI Assistant
+              </button>
+              <button
                 onClick={() => setMode("dev")}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 font-mono text-xs transition-colors ${
                   mode === "dev" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Terminal className="h-3.5 w-3.5" /> Developer
-              </button>
-              <button
-                onClick={() => setMode("vibe")}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 font-mono text-xs transition-colors ${
-                  mode === "vibe" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <MessageSquareCode className="h-3.5 w-3.5" /> Vibe Coder
               </button>
             </div>
 
