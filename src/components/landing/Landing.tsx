@@ -15,7 +15,7 @@ function Logo({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <img 
-        src="/logo.svg" 
+        src="/android-chrome-192x192.png" 
         alt="byok-relay logo" 
         className="h-7 w-7"
       />
