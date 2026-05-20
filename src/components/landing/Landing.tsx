@@ -360,11 +360,11 @@ using the hosted relay at https://relay.byokrelay.com`}</CodeBlock>
 
 function Providers() {
   const providers = [
-    { name: "OpenAI", note: "GPT-4o, o3" },
-    { name: "Anthropic", note: "Claude 3.5, 4" },
-    { name: "Google Gemini", note: "1.5, 2.0" },
-    { name: "Groq", note: "Llama, Mixtral" },
-    { name: "Mistral", note: "Large, Codestral" },
+    { name: "OpenAI", note: "chat · completions · embeddings" },
+    { name: "Anthropic", note: "messages API" },
+    { name: "Google Gemini", note: "generateContent API" },
+    { name: "Groq", note: "OpenAI-compatible" },
+    { name: "Mistral", note: "chat completions" },
     { name: "OpenRouter", note: "200+ models" },
     { name: "Any OpenAI-compatible endpoint", note: "self-hosted, vLLM, etc." },
   ];
