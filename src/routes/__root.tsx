@@ -83,6 +83,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "byok-relay — Let your users bring their own AI keys" },
       { name: "twitter:description", content: "byok-relay is an open-source BYOK relay that lets your users connect their own OpenAI, Anthropic, or Gemini keys to your app. No backend needed for frontend-only projects." },
+      { property: "og:image", content: "https://byokrelay.com/og-image.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "byok-relay architecture: Your App and Your Users connect to byok-relay (encrypted key storage + CORS-safe proxy) which routes to OpenAI, Anthropic, Gemini, Grok, DeepSeek and more" },
+      { name: "twitter:image", content: "https://byokrelay.com/og-image.png" },
+      { name: "twitter:image:alt", content: "byok-relay architecture diagram" },
     ],
     links: [
       {
