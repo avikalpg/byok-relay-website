@@ -17,6 +17,8 @@ function Logo({ className = "" }: { className?: string }) {
       <img 
         src="/android-chrome-192x192.png" 
         alt="byok-relay logo" 
+        width="28"
+        height="28"
         className="h-7 w-7"
       />
       <span className="font-mono text-[15px] font-medium tracking-tight">
