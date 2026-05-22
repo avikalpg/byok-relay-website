@@ -19,7 +19,8 @@ function withLinkHeaders(response: Response): Response {
   const ct = response.headers.get("content-type") ?? "";
   if (!ct.includes("text/html")) return response;
   const headers = new Headers(response.headers);
-  headers.set("link", AGENT_DISCOVERY_LINK_HEADER);
+  // append, not set — preserves any pre-existing Link headers (preload hints etc.)
+  headers.append("link", AGENT_DISCOVERY_LINK_HEADER);
   return new Response(response.body, { status: response.status, headers });
 }
 
@@ -102,7 +103,7 @@ export default {
       return withLinkHeaders(await normalizeCatastrophicSsrResponse(response));
     } catch (error) {
       console.error(error);
-      return brandedErrorResponse();
+      return withLinkHeaders(brandedErrorResponse());
     }
   },
 };
