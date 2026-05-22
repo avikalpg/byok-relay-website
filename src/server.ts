@@ -4,6 +4,25 @@ import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { prefersMarkdown, serveAsMarkdown } from "./lib/markdown-negotiation";
 
+// RFC 8288 Link headers injected on every HTML response so agents can
+// discover machine-readable resources without parsing the page.
+// rel="describedby"  → llms.txt  (machine-readable service description)
+// rel="service-doc"  → /skill    (agent skill / how-to-use documentation)
+// rel="api-catalog"  → RFC 9727 JSON catalog of the relay API endpoints
+const AGENT_DISCOVERY_LINK_HEADER =
+  '</llms.txt>; rel="describedby", ' +
+  '</skill>; rel="service-doc", ' +
+  '</.well-known/api-catalog>; rel="api-catalog"';
+
+/** Attach agent-discovery Link headers to any HTML response. */
+function withLinkHeaders(response: Response): Response {
+  const ct = response.headers.get("content-type") ?? "";
+  if (!ct.includes("text/html")) return response;
+  const headers = new Headers(response.headers);
+  headers.set("link", AGENT_DISCOVERY_LINK_HEADER);
+  return new Response(response.body, { status: response.status, headers });
+}
+
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
@@ -80,7 +99,7 @@ export default {
       }
 
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      return withLinkHeaders(await normalizeCatastrophicSsrResponse(response));
     } catch (error) {
       console.error(error);
       return brandedErrorResponse();
