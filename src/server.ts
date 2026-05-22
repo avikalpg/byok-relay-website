@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { prefersMarkdown, serveAsMarkdown } from "./lib/markdown-negotiation";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -70,6 +71,14 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
+
+      // Serve markdown when the client prefers it (AI agents, crawlers)
+      if (prefersMarkdown(request)) {
+        const mdResponse = await serveAsMarkdown(request, handler, env, ctx);
+        if (mdResponse) return mdResponse;
+        // If conversion failed (non-HTML page, error, etc.) fall through
+      }
+
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
