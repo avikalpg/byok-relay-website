@@ -1,24 +1,86 @@
 import "./lib/error-capture";
 
-import TurndownService from "turndown";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
 // ── Markdown content negotiation ─────────────────────────────────────────────
 // When a client sends `Accept: text/markdown` (AI agents, crawlers),
-// we fetch the page as HTML, convert it to markdown at the edge, and
-// return it with Content-Type: text/markdown.
-// This mirrors Cloudflare's "Markdown for Agents" zone feature, which
-// is not yet available via API or on the current plan.
+// we fetch the page as HTML, convert it at the edge, and return it
+// with Content-Type: text/markdown.
+//
+// Uses a zero-dependency regex converter — no require(), no Node APIs —
+// so it works in the Cloudflare Workers runtime without issue.
+// (turndown was tried first but uses require() at init time, which
+// the Workers runtime rejects at deploy with error code 10021.)
 
-const turndown = new TurndownService({
-  headingStyle: "atx",
-  codeBlockStyle: "fenced",
-  bulletListMarker: "-",
-});
+/** Decode common HTML entities. */
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ");
+}
 
-// Strip nav / footer / script / style noise — agents don't need it
-turndown.remove(["script", "style", "nav", "footer", "head"]);
+/** Strip all HTML tags from a string and decode entities. */
+function stripTags(html: string): string {
+  return decodeEntities(html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
+}
+
+/**
+ * Minimal HTML → Markdown converter.
+ * Regex-only, zero dependencies, safe for Cloudflare Workers.
+ * Covers the patterns found in a TanStack Start marketing site.
+ */
+function htmlToMarkdown(html: string): string {
+  return (
+    html
+      // — Remove entire elements agents don't need —
+      .replace(/<(script|style|nav|footer|head)[^>]*>[\s\S]*?<\/\1>/gi, "")
+      // — Headings —
+      .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, c) => `\n# ${stripTags(c)}\n`)
+      .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, c) => `\n## ${stripTags(c)}\n`)
+      .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, c) => `\n### ${stripTags(c)}\n`)
+      .replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, (_, c) => `\n#### ${stripTags(c)}\n`)
+      .replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, (_, c) => `\n##### ${stripTags(c)}\n`)
+      .replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, (_, c) => `\n###### ${stripTags(c)}\n`)
+      // — Links —
+      .replace(
+        /<a[^>]+href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi,
+        (_, href, text) => `[${stripTags(text)}](${href})`,
+      )
+      // — Inline formatting —
+      .replace(/<(strong|b)[^>]*>([\s\S]*?)<\/\1>/gi, (_, _t, c) => `**${stripTags(c)}**`)
+      .replace(/<(em|i)[^>]*>([\s\S]*?)<\/\1>/gi, (_, _t, c) => `_${stripTags(c)}_`)
+      // — Code blocks before inline code —
+      .replace(
+        /<pre[^>]*>\s*<code[^>]*>([\s\S]*?)<\/code>\s*<\/pre>/gi,
+        (_, c) => `\n\`\`\`\n${decodeEntities(c).trim()}\n\`\`\`\n`,
+      )
+      .replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, (_, c) => `\`${decodeEntities(c).trim()}\``)
+      // — Lists —
+      .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, c) => `- ${stripTags(c).trim()}\n`)
+      .replace(/<\/(ul|ol)>/gi, "\n")
+      // — Block elements → blank line —
+      .replace(/<\/(p|div|section|article|main|header)>/gi, "\n\n")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<hr\s*\/?>/gi, "\n---\n")
+      // — Strip remaining tags —
+      .replace(/<[^>]+>/g, "")
+      // — Decode any remaining entities —
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, " ")
+      // — Clean up whitespace —
+      .replace(/\n{3,}/g, "\n\n")
+      .trim()
+  );
+}
 
 /** Rough token estimate: ~4 chars per token (GPT-family average). */
 function estimateTokens(text: string): number {
@@ -66,7 +128,7 @@ async function serveAsMarkdown(
   }
 
   const html = await htmlResponse.text();
-  const markdown = turndown.turndown(html);
+  const markdown = htmlToMarkdown(html);
   const tokens = estimateTokens(markdown);
 
   return new Response(markdown, {
