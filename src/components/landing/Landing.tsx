@@ -282,7 +282,7 @@ function Quickstart() {
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <div className="mb-4 flex flex-col gap-1 rounded-lg border border-border bg-card p-1 sm:flex-row">
               <button
                 onClick={() => setMode("vibe")}
