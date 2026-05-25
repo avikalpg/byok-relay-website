@@ -232,6 +232,15 @@ function Unlocks() {
 }
 
 function CodeBlock({ children, language = "bash" }: { children: string; language?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(children).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <div className="flex items-center justify-between border-b border-border bg-muted/40 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -239,11 +248,17 @@ function CodeBlock({ children, language = "bash" }: { children: string; language
           <Terminal className="h-3 w-3" />
           <span>{language}</span>
         </div>
-        <div className="flex gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-border" />
-          <span className="h-2 w-2 rounded-full bg-border" />
-          <span className="h-2 w-2 rounded-full bg-signal/60" />
-        </div>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 rounded px-2 py-1 transition-colors hover:bg-muted hover:text-foreground"
+          aria-label="Copy to clipboard"
+        >
+          {copied ? (
+            <><Check className="h-3 w-3 text-signal" /><span className="text-signal">copied</span></>
+          ) : (
+            <><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>copy</span></>
+          )}
+        </button>
       </div>
       <pre className="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed text-foreground">
         <code>{children}</code>
