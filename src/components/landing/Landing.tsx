@@ -234,6 +234,15 @@ function Unlocks() {
 }
 
 function CodeBlock({ children, language = "bash" }: { children: string; language?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(children).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <div className="flex items-center justify-between border-b border-border bg-muted/40 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -241,11 +250,17 @@ function CodeBlock({ children, language = "bash" }: { children: string; language
           <Terminal className="h-3 w-3" />
           <span>{language}</span>
         </div>
-        <div className="flex gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-border" />
-          <span className="h-2 w-2 rounded-full bg-border" />
-          <span className="h-2 w-2 rounded-full bg-signal/60" />
-        </div>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 rounded px-2 py-1 transition-colors hover:bg-muted hover:text-foreground"
+          aria-label="Copy to clipboard"
+        >
+          {copied ? (
+            <><Check className="h-3 w-3 text-signal" /><span className="text-signal">copied</span></>
+          ) : (
+            <><svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>copy</span></>
+          )}
+        </button>
       </div>
       <pre className="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed text-foreground">
         <code>{children}</code>
@@ -255,7 +270,7 @@ function CodeBlock({ children, language = "bash" }: { children: string; language
 }
 
 function Quickstart() {
-  const [mode, setMode] = useState<"dev" | "vibe">("dev");
+  const [mode, setMode] = useState<"dev" | "vibe">("vibe");
   return (
     <section id="quickstart" className="border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-24 md:py-32">
@@ -284,8 +299,16 @@ function Quickstart() {
             </div>
           </div>
 
-          <div>
-            <div className="mb-4 flex gap-1 rounded-lg border border-border bg-card p-1">
+          <div className="min-w-0">
+            <div className="mb-4 flex flex-col gap-1 rounded-lg border border-border bg-card p-1 sm:flex-row">
+              <button
+                onClick={() => setMode("vibe")}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 font-mono text-xs transition-colors ${
+                  mode === "vibe" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <MessageSquareCode className="h-3.5 w-3.5" /> AI Assistant
+              </button>
               <button
                 onClick={() => setMode("dev")}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 font-mono text-xs transition-colors ${
@@ -294,22 +317,16 @@ function Quickstart() {
               >
                 <Terminal className="h-3.5 w-3.5" /> Developer
               </button>
-              <button
-                onClick={() => setMode("vibe")}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 font-mono text-xs transition-colors ${
-                  mode === "vibe" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <MessageSquareCode className="h-3.5 w-3.5" /> Vibe Coder
-              </button>
             </div>
 
             {mode === "dev" && (
-              <CodeBlock>{`git clone https://github.com/avikalpg/byok-relay.git
-cd byok-relay && npm install
-echo "ENCRYPTION_SECRET=$(openssl rand -hex 32)" > .env
-echo "ALLOWED_ORIGINS=https://your-app.com" >> .env
-npm start`}</CodeBlock>
+              <>
+                <CodeBlock>{`npx byok-relay`}</CodeBlock>
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                  Starts a local relay in seconds — no install needed. For self-hosting, manual setup, or deployment options,{" "}
+                  <a href="https://github.com/avikalpg/byok-relay#readme" className="text-foreground underline decoration-signal decoration-2 underline-offset-4" target="_blank" rel="noreferrer">see the README →</a>
+                </p>
+              </>
             )}
 
             {mode === "vibe" && (
@@ -322,17 +339,7 @@ using the hosted relay at https://relay.byokrelay.com`}</CodeBlock>
 
             {mode === "vibe" && (
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Built on <span className="text-foreground">Lovable</span>,{" "}
-                <span className="text-foreground">Bolt</span>,{" "}
-                <span className="text-foreground">Replit</span>,{" "}
-                <span className="text-foreground">v0</span>,{" "}
-                <span className="text-foreground">Emergent</span>,{" "}
-                <span className="text-foreground">Google AI Studio</span>,{" "}
-                <span className="text-foreground">rocket.new</span>,{" "}
-                <span className="text-foreground">Claude cowork</span>,{" "}
-                <span className="text-foreground">Codex</span> — or any agent-powered builder?{" "}
-                <span className="text-foreground">You don't need a terminal.</span>{" "}
-                Just paste the prompt above into your AI assistant. It will read the skill, wire the integration, and deploy — no commands needed.
+                No terminal needed. Paste the prompt above into your AI coding assistant — it will read the integration guide, wire up byok-relay, and deploy automatically.
               </p>
             )}
           </div>
@@ -370,11 +377,11 @@ using the hosted relay at https://relay.byokrelay.com`}</CodeBlock>
 
 function Providers() {
   const providers = [
-    { name: "OpenAI", note: "GPT-4o, o3" },
-    { name: "Anthropic", note: "Claude 3.5, 4" },
-    { name: "Google Gemini", note: "1.5, 2.0" },
-    { name: "Groq", note: "Llama, Mixtral" },
-    { name: "Mistral", note: "Large, Codestral" },
+    { name: "OpenAI", note: "chat · completions · embeddings" },
+    { name: "Anthropic", note: "messages API" },
+    { name: "Google Gemini", note: "generateContent API" },
+    { name: "Groq", note: "OpenAI-compatible" },
+    { name: "Mistral", note: "chat completions" },
     { name: "OpenRouter", note: "200+ models" },
     { name: "Any OpenAI-compatible endpoint", note: "self-hosted, vLLM, etc." },
   ];
