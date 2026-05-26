@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "serverInfo": {
+    "name": "byok-relay",
+    "version": "0.1.0",
+    "description": "Self-hostable BYOK AI relay. Stores user API keys encrypted server-side and proxies requests to OpenAI, Anthropic, Gemini, Groq, Mistral, and any OpenAI-compatible endpoint. Developers pay nothing for inference — users bring their own keys."
+  },
+  "transport": [
+    {
+      "type": "http",
+      "url": "https://relay.byokrelay.com"
+    }
+  ],
+  "capabilities": {
+    "llm_proxy": true,
+    "key_storage": true,
+    "multi_provider": true,
+    "self_hostable": true
+  },
+  "links": {
+    "homepage": "https://byokrelay.com",
+    "documentation": "https://byokrelay.com/llms.txt",
+    "agent_skill": "https://byokrelay.com/skill",
+    "source_code": "https://github.com/avikalpg/byok-relay"
+  }
+}
