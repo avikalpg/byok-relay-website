@@ -1,6 +1,6 @@
 {
   "name": "byok-relay",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Self-hostable BYOK AI relay. Stores user API keys encrypted and proxies requests to AI providers. Developers ship AI features without handling user API keys in their backend.",
   "url": "https://relay.byokrelay.com",
   "documentationUrl": "https://byokrelay.com/llms.txt",
@@ -19,12 +19,14 @@
     {
       "id": "byok-relay-integration",
       "name": "BYOK Relay Integration",
-      "description": "Integrate byok-relay into a frontend app to enable users to bring their own AI provider API keys. No backend required for the managed relay.",
-      "tags": ["ai", "relay", "byok", "llm", "api-gateway"],
+      "description": "Integrate byok-relay into an app to enable users to bring their own AI provider API keys. No backend required for the managed relay.",
+      "tags": ["ai", "relay", "byok", "llm", "api-gateway", "cors", "openai-compatible", "multi-provider", "proxy", "encryption", "self-hostable", "frontend", "browser", "openai", "anthropic", "gemini", "groq", "mistral"],
       "examples": [
         "Add BYOK AI support to my React app",
         "Let users bring their own OpenAI key",
-        "Proxy AI requests without exposing keys in frontend code"
+        "Proxy AI requests without exposing keys in frontend code",
+        "Add a way to connect to any AI provider, like OpenAI, Anthropic, Gemini, Grok, etc.",
+        "Open source AI-gateway to connect with open-source models on Hugging Face"
       ]
     }
   ]
