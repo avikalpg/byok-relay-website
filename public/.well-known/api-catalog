@@ -1,23 +1,30 @@
 {
-  "apis": [
+  "linkset": [
     {
-      "title": "byok-relay — BYOK AI relay API",
-      "description": "Self-hostable relay that stores user API keys encrypted and proxies requests to AI providers (OpenAI, Anthropic, Gemini, Groq, Mistral, and any OpenAI-compatible endpoint). Users bring their own provider keys; developers pay nothing for inference.",
-      "humanURL": "https://github.com/avikalpg/byok-relay",
-      "baseURL": "https://relay.byokrelay.com",
-      "properties": [
+      "anchor": "https://relay.byokrelay.com",
+      "service-desc": [
         {
-          "type": "X-service-doc",
-          "url": "https://byokrelay.com/llms.txt"
-        },
-        {
-          "type": "X-agent-skill",
-          "url": "https://byokrelay.com/skill"
+          "href": "https://github.com/avikalpg/byok-relay/blob/main/README.md",
+          "type": "text/markdown"
         }
       ],
-      "contact": {
-        "url": "https://github.com/avikalpg/byok-relay/issues"
-      }
+      "service-doc": [
+        {
+          "href": "https://byokrelay.com/llms.txt",
+          "type": "text/plain"
+        }
+      ],
+      "describedby": [
+        {
+          "href": "https://byokrelay.com/skill",
+          "type": "text/plain"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://relay.byokrelay.com/health"
+        }
+      ]
     }
   ]
 }

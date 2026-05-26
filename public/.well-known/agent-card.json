@@ -1,0 +1,31 @@
+{
+  "name": "byok-relay",
+  "version": "0.1.0",
+  "description": "Self-hostable BYOK AI relay. Stores user API keys encrypted and proxies requests to AI providers. Developers ship AI features without handling user API keys in their backend.",
+  "url": "https://relay.byokrelay.com",
+  "documentationUrl": "https://byokrelay.com/llms.txt",
+  "provider": {
+    "organization": "byok-relay",
+    "url": "https://byokrelay.com"
+  },
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["application/json", "text/event-stream"],
+  "skills": [
+    {
+      "id": "byok-relay-integration",
+      "name": "BYOK Relay Integration",
+      "description": "Integrate byok-relay into a frontend app to enable users to bring their own AI provider API keys. No backend required for the managed relay.",
+      "tags": ["ai", "relay", "byok", "llm", "api-gateway"],
+      "examples": [
+        "Add BYOK AI support to my React app",
+        "Let users bring their own OpenAI key",
+        "Proxy AI requests without exposing keys in frontend code"
+      ]
+    }
+  ]
+}

@@ -12,7 +12,27 @@ import { prefersMarkdown, serveAsMarkdown } from "./lib/markdown-negotiation";
 const AGENT_DISCOVERY_LINK_HEADER =
   '</llms.txt>; rel="describedby", ' +
   '</skill>; rel="service-doc", ' +
-  '</.well-known/api-catalog>; rel="api-catalog"';
+  '</.well-known/api-catalog>; rel="api-catalog", ' +
+  '</.well-known/agent-card.json>; rel="https://a2a-protocol.org/agent-card", ' +
+  '</.well-known/agent-skills/index.json>; rel="https://agentskills.io/index"';
+
+/**
+ * Fix Content-Type for static well-known files that have no extension.
+ * Cloudflare Workers serves extension-less files without a Content-Type;
+ * RFC 9727 requires /.well-known/api-catalog to return application/linkset+json.
+ */
+function withWellKnownContentType(request: Request, response: Response): Response {
+  const url = new URL(request.url);
+  if (url.pathname === "/.well-known/api-catalog" && response.status === 200) {
+    const ct = response.headers.get("content-type") ?? "";
+    if (!ct.includes("application/linkset+json")) {
+      const headers = new Headers(response.headers);
+      headers.set("content-type", "application/linkset+json");
+      return new Response(response.body, { status: response.status, headers });
+    }
+  }
+  return response;
+}
 
 /** Attach agent-discovery Link headers to any HTML response. */
 function withLinkHeaders(response: Response): Response {
@@ -100,7 +120,8 @@ export default {
       }
 
       const response = await handler.fetch(request, env, ctx);
-      return withLinkHeaders(await normalizeCatastrophicSsrResponse(response));
+      const normalized = await normalizeCatastrophicSsrResponse(response);
+      return withLinkHeaders(withWellKnownContentType(request, normalized));
     } catch (error) {
       console.error(error);
       return withLinkHeaders(brandedErrorResponse());
