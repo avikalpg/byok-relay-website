@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Github, ArrowRight, Check, X, AlertTriangle, Terminal, KeyRound, Shield, Zap, Lock, Server, Activity, MessageSquareCode, Cloud, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -49,6 +50,9 @@ function Header() {
               {l.label}
             </a>
           ))}
+          <Link to="/benchmarks" className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors">
+            Benchmarks
+          </Link>
         </nav>
         <a href={GH_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 font-mono text-xs hover:border-foreground/40 transition-colors">
           <Github className="h-3.5 w-3.5" />
