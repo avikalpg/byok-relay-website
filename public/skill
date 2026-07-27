@@ -36,7 +36,13 @@ Browser apps can't call AI APIs directly:
 
 **Individuals / prosumers:** Each user registers their own personal API key. Common for developer tools, research UIs, AI power-user products.
 
-**Teams / B2B (company-managed key):** A company admin registers one shared company API key via `POST /keys/:provider` (e.g. `/keys/openai`). In the current implementation, keys are stored per relay-token (user); to share a key across team members, the admin can share their relay token or register the same company key under each member's account. Org-level key sharing (one stored key → multiple relay tokens) is on the roadmap. The developer doesn't touch the key — it belongs to the customer's organization.
+**Teams / B2B (company-managed key):** Caution: sharing a relay token across team members increases blast radius and removes per-user auditability if that token leaks. A company admin registers one shared company API key via `POST /keys/:provider` (e.g. `/keys/openai`). In the current implementation, keys are stored per relay-token (user); to share a company key, prefer registering the same company key under each member's account until org-level key sharing (one stored key → multiple relay tokens) is implemented. The developer doesn't touch the key — it belongs to the customer's organization.
+
+Team-token best practices:
+- Prefer per-user relay tokens over a shared relay token until org-level sharing lands.
+- Use the shortest-lived relay tokens your deployment supports and avoid storing them in shared docs or chat.
+- Document regular rotation and immediate revocation procedures before rollout.
+- Revoke and replace any shared or suspected-compromised relay token immediately.
 
 ## Setup - choose your path
 
