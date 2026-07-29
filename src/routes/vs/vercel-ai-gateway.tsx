@@ -9,13 +9,13 @@ const data: VsPageProps = {
     url: "https://vercel.com/ai",
     description:
       "Vercel AI Gateway is a managed AI proxy integrated into the Vercel platform. It provides a unified endpoint across AI providers, with observability, caching, and fallback routing — all within Vercel's infrastructure. Launched May 2026, it targets developers already hosting on Vercel who want AI features without building a backend.",
-    bestFor: "Vercel-hosted projects that want managed AI routing with observability and no backend setup",
+    bestFor:
+      "Vercel-hosted projects that want managed AI routing with observability and no backend setup",
     primaryDiff:
       "Vercel AI Gateway is managed, Vercel-only, and bills you for AI usage. byok-relay is self-hostable, platform-agnostic, and free — letting your users bring their own keys so your inference bill stays zero.",
   },
   verdict: {
-    headline:
-      "Managed and Vercel-tied vs open-source and self-hostable.",
+    headline: "Managed and Vercel-tied vs open-source and self-hostable.",
     useByok:
       "Your users have their own AI credits and you want zero inference costs. Or you're not on Vercel, or you don't want vendor lock-in to a hosting platform.",
     useCompetitor:
@@ -124,8 +124,7 @@ export const Route = createFileRoute("/vs/vercel-ai-gateway")({
       },
       {
         property: "og:title",
-        content:
-          "byok-relay vs Vercel AI Gateway — Open-Source BYOK vs Managed AI Proxy",
+        content: "byok-relay vs Vercel AI Gateway — Open-Source BYOK vs Managed AI Proxy",
       },
       {
         property: "og:description",

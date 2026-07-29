@@ -14,8 +14,7 @@ const data: VsPageProps = {
       "Helicone adds visibility to your AI calls — logs, costs, caching. byok-relay adds a different primitive entirely: letting your users bring their own keys so you never pay for their inference in the first place.",
   },
   verdict: {
-    headline:
-      "Observability layer vs BYOK relay — complementary problems.",
+    headline: "Observability layer vs BYOK relay — complementary problems.",
     useByok:
       "Your users already have AI credits and you want to stop paying for their inference. BYOK makes the cost model sustainable — each user pays their own provider.",
     useCompetitor:

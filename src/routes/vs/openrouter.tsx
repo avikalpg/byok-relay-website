@@ -14,8 +14,7 @@ const data: VsPageProps = {
       "The core difference: OpenRouter manages the API keys and bills you. byok-relay lets your users bring their own keys — so they pay their own provider, and your inference bill stays zero.",
   },
   verdict: {
-    headline:
-      "Different tools. Different billing models. Different use cases.",
+    headline: "Different tools. Different billing models. Different use cases.",
     useByok:
       "Your users already have AI credits (employer keys, startup programs, personal accounts) and you don't want to pay for their inference. BYOK removes the cost objection entirely.",
     useCompetitor:

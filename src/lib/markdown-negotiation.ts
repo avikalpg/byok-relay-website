@@ -24,7 +24,12 @@ function decodeEntities(s: string): string {
 
 /** Strip all HTML tags from a string and decode entities. */
 function stripTags(html: string): string {
-  return decodeEntities(html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
+  return decodeEntities(
+    html
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
 }
 
 /**
@@ -112,7 +117,7 @@ export function prefersMarkdown(request: Request): boolean {
     return { type: type.trim(), q: isNaN(q) ? 1 : q };
   });
 
-  const mdQ   = types.find((t) => t.type === "text/markdown")?.q ?? 0;
+  const mdQ = types.find((t) => t.type === "text/markdown")?.q ?? 0;
   const htmlQ = types.find((t) => t.type === "text/html" || t.type === "*/*")?.q ?? 0;
   return mdQ >= htmlQ;
 }
@@ -132,7 +137,9 @@ const FORWARD_HEADERS = [
 
 // ── Main entry point ──────────────────────────────────────────────────────────
 
-type FetchHandler = { fetch: (req: Request, env: unknown, ctx: unknown) => Promise<Response> | Response };
+type FetchHandler = {
+  fetch: (req: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
+};
 
 /**
  * Attempt to serve a markdown response for the given request.
@@ -163,9 +170,9 @@ export async function serveAsMarkdown(
     return null;
   }
 
-  const html     = await htmlResponse.text();
+  const html = await htmlResponse.text();
   const markdown = htmlToMarkdown(html);
-  const tokens   = estimateTokens(markdown);
+  const tokens = estimateTokens(markdown);
 
   // Forward a safe subset of security/cache headers from the HTML response
   const forwarded: Record<string, string> = {};
@@ -177,11 +184,11 @@ export async function serveAsMarkdown(
   return new Response(markdown, {
     status: 200,
     headers: {
-      "content-type":      "text/markdown; charset=utf-8",
+      "content-type": "text/markdown; charset=utf-8",
       "x-markdown-tokens": String(tokens),
       // Vary: Accept tells caches that the response differs by Accept header,
       // preventing markdown from being served to browser requests (or vice versa).
-      "vary":              "Accept",
+      vary: "Accept",
       ...forwarded,
     },
   });

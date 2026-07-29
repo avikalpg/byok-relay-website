@@ -6,7 +6,7 @@
       "type": "skill-md",
       "description": "Integrate byok-relay into an app so users can bring their own AI provider API keys. No backend required when using the managed relay. Supports OpenAI, Anthropic, Gemini, Groq, Mistral, and any OpenAI-compatible endpoint.",
       "url": "https://byokrelay.com/skill",
-      "sha256": "3c1fdaaa7e5e2add4835453ff6e4b57752e953235731ab0db6bfb61c6ccd5568"
+      "sha256": "3b461f81cf028e2e4b55ed1c354a12221e6e2dea5dcabeec65a44198b80d1cff"
     }
   ]
 }

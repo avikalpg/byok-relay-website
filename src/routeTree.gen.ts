@@ -10,9 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as VsOpenrouterRouteImport } from './routes/vs/openrouter'
-import { Route as VsLitellmRouteImport } from './routes/vs/litellm'
+import { Route as BenchmarksRouteImport } from './routes/benchmarks'
 import { Route as VsHeliconeRouteImport } from './routes/vs/helicone'
+import { Route as VsLitellmRouteImport } from './routes/vs/litellm'
+import { Route as VsOpenrouterRouteImport } from './routes/vs/openrouter'
 import { Route as VsVercelAiGatewayRouteImport } from './routes/vs/vercel-ai-gateway'
 
 const IndexRoute = IndexRouteImport.update({
@@ -20,25 +21,26 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-
-const VsOpenrouterRoute = VsOpenrouterRouteImport.update({
-  id: '/vs/openrouter',
-  path: '/vs/openrouter',
+const BenchmarksRoute = BenchmarksRouteImport.update({
+  id: '/benchmarks',
+  path: '/benchmarks',
   getParentRoute: () => rootRouteImport,
 } as any)
-
-const VsLitellmRoute = VsLitellmRouteImport.update({
-  id: '/vs/litellm',
-  path: '/vs/litellm',
-  getParentRoute: () => rootRouteImport,
-} as any)
-
 const VsHeliconeRoute = VsHeliconeRouteImport.update({
   id: '/vs/helicone',
   path: '/vs/helicone',
   getParentRoute: () => rootRouteImport,
 } as any)
-
+const VsLitellmRoute = VsLitellmRouteImport.update({
+  id: '/vs/litellm',
+  path: '/vs/litellm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VsOpenrouterRoute = VsOpenrouterRouteImport.update({
+  id: '/vs/openrouter',
+  path: '/vs/openrouter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VsVercelAiGatewayRoute = VsVercelAiGatewayRouteImport.update({
   id: '/vs/vercel-ai-gateway',
   path: '/vs/vercel-ai-gateway',
@@ -47,39 +49,62 @@ const VsVercelAiGatewayRoute = VsVercelAiGatewayRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/vs/openrouter': typeof VsOpenrouterRoute
-  '/vs/litellm': typeof VsLitellmRoute
+  '/benchmarks': typeof BenchmarksRoute
   '/vs/helicone': typeof VsHeliconeRoute
+  '/vs/litellm': typeof VsLitellmRoute
+  '/vs/openrouter': typeof VsOpenrouterRoute
   '/vs/vercel-ai-gateway': typeof VsVercelAiGatewayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/vs/openrouter': typeof VsOpenrouterRoute
-  '/vs/litellm': typeof VsLitellmRoute
+  '/benchmarks': typeof BenchmarksRoute
   '/vs/helicone': typeof VsHeliconeRoute
+  '/vs/litellm': typeof VsLitellmRoute
+  '/vs/openrouter': typeof VsOpenrouterRoute
   '/vs/vercel-ai-gateway': typeof VsVercelAiGatewayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/vs/openrouter': typeof VsOpenrouterRoute
-  '/vs/litellm': typeof VsLitellmRoute
+  '/benchmarks': typeof BenchmarksRoute
   '/vs/helicone': typeof VsHeliconeRoute
+  '/vs/litellm': typeof VsLitellmRoute
+  '/vs/openrouter': typeof VsOpenrouterRoute
   '/vs/vercel-ai-gateway': typeof VsVercelAiGatewayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/vs/openrouter' | '/vs/litellm' | '/vs/helicone' | '/vs/vercel-ai-gateway'
+  fullPaths:
+    | '/'
+    | '/benchmarks'
+    | '/vs/helicone'
+    | '/vs/litellm'
+    | '/vs/openrouter'
+    | '/vs/vercel-ai-gateway'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/vs/openrouter' | '/vs/litellm' | '/vs/helicone' | '/vs/vercel-ai-gateway'
-  id: '__root__' | '/' | '/vs/openrouter' | '/vs/litellm' | '/vs/helicone' | '/vs/vercel-ai-gateway'
+  to:
+    | '/'
+    | '/benchmarks'
+    | '/vs/helicone'
+    | '/vs/litellm'
+    | '/vs/openrouter'
+    | '/vs/vercel-ai-gateway'
+  id:
+    | '__root__'
+    | '/'
+    | '/benchmarks'
+    | '/vs/helicone'
+    | '/vs/litellm'
+    | '/vs/openrouter'
+    | '/vs/vercel-ai-gateway'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  VsOpenrouterRoute: typeof VsOpenrouterRoute
-  VsLitellmRoute: typeof VsLitellmRoute
+  BenchmarksRoute: typeof BenchmarksRoute
   VsHeliconeRoute: typeof VsHeliconeRoute
+  VsLitellmRoute: typeof VsLitellmRoute
+  VsOpenrouterRoute: typeof VsOpenrouterRoute
   VsVercelAiGatewayRoute: typeof VsVercelAiGatewayRoute
 }
 
@@ -92,11 +117,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vs/openrouter': {
-      id: '/vs/openrouter'
-      path: '/vs/openrouter'
-      fullPath: '/vs/openrouter'
-      preLoaderRoute: typeof VsOpenrouterRouteImport
+    '/benchmarks': {
+      id: '/benchmarks'
+      path: '/benchmarks'
+      fullPath: '/benchmarks'
+      preLoaderRoute: typeof BenchmarksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vs/helicone': {
+      id: '/vs/helicone'
+      path: '/vs/helicone'
+      fullPath: '/vs/helicone'
+      preLoaderRoute: typeof VsHeliconeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vs/litellm': {
@@ -106,11 +138,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VsLitellmRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vs/helicone': {
-      id: '/vs/helicone'
-      path: '/vs/helicone'
-      fullPath: '/vs/helicone'
-      preLoaderRoute: typeof VsHeliconeRouteImport
+    '/vs/openrouter': {
+      id: '/vs/openrouter'
+      path: '/vs/openrouter'
+      fullPath: '/vs/openrouter'
+      preLoaderRoute: typeof VsOpenrouterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vs/vercel-ai-gateway': {
@@ -125,9 +157,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  VsOpenrouterRoute: VsOpenrouterRoute,
-  VsLitellmRoute: VsLitellmRoute,
+  BenchmarksRoute: BenchmarksRoute,
   VsHeliconeRoute: VsHeliconeRoute,
+  VsLitellmRoute: VsLitellmRoute,
+  VsOpenrouterRoute: VsOpenrouterRoute,
   VsVercelAiGatewayRoute: VsVercelAiGatewayRoute,
 }
 export const routeTree = rootRouteImport

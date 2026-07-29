@@ -51,7 +51,10 @@ function Header({ competitorName }: { competitorName: string }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
-        <Link to="/" className="flex items-center gap-2 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors">
+        <Link
+          to="/"
+          className="flex items-center gap-2 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
           <ArrowLeft className="h-3.5 w-3.5" />
           <Logo />
         </Link>
@@ -72,13 +75,7 @@ function Header({ competitorName }: { competitorName: string }) {
   );
 }
 
-function Cell({
-  v,
-  highlight,
-}: {
-  v: boolean | "warn" | string;
-  highlight?: boolean;
-}) {
+function Cell({ v, highlight }: { v: boolean | "warn" | string; highlight?: boolean }) {
   const base = "px-5 py-4 text-sm align-top";
   const bg = highlight ? "bg-signal/[0.05]" : "";
   if (v === true)
@@ -106,9 +103,7 @@ function Cell({
       </td>
     );
   return (
-    <td className={`${base} ${bg} ${highlight ? "font-medium" : "text-muted-foreground"}`}>
-      {v}
-    </td>
+    <td className={`${base} ${bg} ${highlight ? "font-medium" : "text-muted-foreground"}`}>{v}</td>
   );
 }
 
@@ -123,15 +118,14 @@ export function VsPage({ competitor, verdict, rows, faq }: VsPageProps) {
         <div className="relative mx-auto max-w-7xl px-6 pt-16 pb-20 md:pt-24 md:pb-28">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 font-mono text-[11px] tracking-tight">
             <span className="h-1.5 w-1.5 rounded-full bg-signal signal-dot" />
-            <span className="text-muted-foreground">Comparison · byok-relay vs {competitor.name}</span>
+            <span className="text-muted-foreground">
+              Comparison · byok-relay vs {competitor.name}
+            </span>
           </div>
 
           <h1 className="max-w-4xl text-balance text-4xl font-bold leading-[1.04] tracking-[-0.03em] md:text-6xl lg:text-[72px]">
-            byok-relay{" "}
-            <span className="text-muted-foreground">vs</span>{" "}
-            <span className="font-display font-normal italic text-signal">
-              {competitor.name}
-            </span>
+            byok-relay <span className="text-muted-foreground">vs</span>{" "}
+            <span className="font-display font-normal italic text-signal">{competitor.name}</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
@@ -178,7 +172,9 @@ export function VsPage({ competitor, verdict, rows, faq }: VsPageProps) {
               <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-background/50">
                 <Check className="h-3.5 w-3.5" /> use {competitor.name} when
               </div>
-              <p className="text-base leading-relaxed text-background/80">{verdict.useCompetitor}</p>
+              <p className="text-base leading-relaxed text-background/80">
+                {verdict.useCompetitor}
+              </p>
             </div>
           </div>
         </div>
@@ -204,11 +200,17 @@ export function VsPage({ competitor, verdict, rows, faq }: VsPageProps) {
                   </th>
                   <th className="bg-signal/[0.05] px-5 py-4 text-left w-1/3">
                     <div className="font-mono text-sm font-medium">byok-relay</div>
-                    <div className="font-mono text-[10px] uppercase tracking-widest text-signal">open-source</div>
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-signal">
+                      open-source
+                    </div>
                   </th>
                   <th className="px-5 py-4 text-left w-1/3">
-                    <div className="font-mono text-sm font-medium text-muted-foreground">{competitor.name}</div>
-                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">{competitor.tagline}</div>
+                    <div className="font-mono text-sm font-medium text-muted-foreground">
+                      {competitor.name}
+                    </div>
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
+                      {competitor.tagline}
+                    </div>
                   </th>
                 </tr>
               </thead>
@@ -249,9 +251,9 @@ export function VsPage({ competitor, verdict, rows, faq }: VsPageProps) {
               <Logo />
               <h3 className="text-2xl font-bold tracking-tight">byok-relay</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">
-                An open-source relay that lets your app's users plug in their own AI API keys.
-                Zero CORS friction. Zero inference bill for you. Keys stay encrypted server-side,
-                never exposed to the browser. Self-host in minutes — single Node.js process + SQLite.
+                An open-source relay that lets your app's users plug in their own AI API keys. Zero
+                CORS friction. Zero inference bill for you. Keys stay encrypted server-side, never
+                exposed to the browser. Self-host in minutes — single Node.js process + SQLite.
               </p>
               <div className="mt-auto pt-2">
                 <span className="rounded-full border border-signal/30 bg-signal/10 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-signal">
@@ -303,14 +305,20 @@ export function VsPage({ competitor, verdict, rows, faq }: VsPageProps) {
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
           <h2 className="max-w-2xl text-4xl font-bold leading-[1.05] tracking-[-0.02em] md:text-5xl">
             Ready to let your users{" "}
-            <span className="font-display font-normal italic text-signal">bring their own keys?</span>
+            <span className="font-display font-normal italic text-signal">
+              bring their own keys?
+            </span>
           </h2>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-background/70">
             byok-relay is open-source and free to self-host. Point an AI coding assistant at the
             integration guide and you're live in under 5 minutes.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="h-12 gap-2 px-5 text-sm bg-signal text-signal-foreground hover:bg-signal/90">
+            <Button
+              asChild
+              size="lg"
+              className="h-12 gap-2 px-5 text-sm bg-signal text-signal-foreground hover:bg-signal/90"
+            >
               <Link to="/">
                 Get started <ArrowRight className="h-4 w-4" />
               </Link>
@@ -335,7 +343,10 @@ export function VsPage({ competitor, verdict, rows, faq }: VsPageProps) {
           <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
             <Logo />
             <nav className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs">
-              <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link
+                to="/"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
                 Home →
               </Link>
               <a
