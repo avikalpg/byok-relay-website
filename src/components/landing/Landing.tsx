@@ -659,6 +659,32 @@ function Compare() {
           AI and want routing + analytics. Use byok-relay when you want users to bring their own
           keys.
         </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a
+            href="/vs/openrouter"
+            className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+          >
+            byok-relay vs OpenRouter →
+          </a>
+          <a
+            href="/vs/litellm"
+            className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+          >
+            byok-relay vs LiteLLM →
+          </a>
+          <a
+            href="/vs/helicone"
+            className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+          >
+            byok-relay vs Helicone →
+          </a>
+          <a
+            href="/vs/vercel-ai-gateway"
+            className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+          >
+            byok-relay vs Vercel AI Gateway →
+          </a>
+        </div>
       </div>
     </section>
   );
@@ -799,6 +825,30 @@ function Footer() {
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               Hosted relay →
+            </a>
+            <a
+              href="/vs/openrouter"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              vs OpenRouter →
+            </a>
+            <a
+              href="/vs/litellm"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              vs LiteLLM →
+            </a>
+            <a
+              href="/vs/helicone"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              vs Helicone →
+            </a>
+            <a
+              href="/vs/vercel-ai-gateway"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              vs Vercel AI Gateway →
             </a>
           </nav>
         </div>

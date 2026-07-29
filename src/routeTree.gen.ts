@@ -9,48 +9,114 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as BenchmarksRouteImport } from './routes/benchmarks'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BenchmarksRouteImport } from './routes/benchmarks'
+import { Route as VsHeliconeRouteImport } from './routes/vs/helicone'
+import { Route as VsLitellmRouteImport } from './routes/vs/litellm'
+import { Route as VsOpenrouterRouteImport } from './routes/vs/openrouter'
+import { Route as VsVercelAiGatewayRouteImport } from './routes/vs/vercel-ai-gateway'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BenchmarksRoute = BenchmarksRouteImport.update({
   id: '/benchmarks',
   path: '/benchmarks',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const VsHeliconeRoute = VsHeliconeRouteImport.update({
+  id: '/vs/helicone',
+  path: '/vs/helicone',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VsLitellmRoute = VsLitellmRouteImport.update({
+  id: '/vs/litellm',
+  path: '/vs/litellm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VsOpenrouterRoute = VsOpenrouterRouteImport.update({
+  id: '/vs/openrouter',
+  path: '/vs/openrouter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VsVercelAiGatewayRoute = VsVercelAiGatewayRouteImport.update({
+  id: '/vs/vercel-ai-gateway',
+  path: '/vs/vercel-ai-gateway',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/benchmarks': typeof BenchmarksRoute
+  '/vs/helicone': typeof VsHeliconeRoute
+  '/vs/litellm': typeof VsLitellmRoute
+  '/vs/openrouter': typeof VsOpenrouterRoute
+  '/vs/vercel-ai-gateway': typeof VsVercelAiGatewayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/benchmarks': typeof BenchmarksRoute
+  '/vs/helicone': typeof VsHeliconeRoute
+  '/vs/litellm': typeof VsLitellmRoute
+  '/vs/openrouter': typeof VsOpenrouterRoute
+  '/vs/vercel-ai-gateway': typeof VsVercelAiGatewayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/benchmarks': typeof BenchmarksRoute
+  '/vs/helicone': typeof VsHeliconeRoute
+  '/vs/litellm': typeof VsLitellmRoute
+  '/vs/openrouter': typeof VsOpenrouterRoute
+  '/vs/vercel-ai-gateway': typeof VsVercelAiGatewayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/benchmarks'
+  fullPaths:
+    | '/'
+    | '/benchmarks'
+    | '/vs/helicone'
+    | '/vs/litellm'
+    | '/vs/openrouter'
+    | '/vs/vercel-ai-gateway'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/benchmarks'
-  id: '__root__' | '/' | '/benchmarks'
+  to:
+    | '/'
+    | '/benchmarks'
+    | '/vs/helicone'
+    | '/vs/litellm'
+    | '/vs/openrouter'
+    | '/vs/vercel-ai-gateway'
+  id:
+    | '__root__'
+    | '/'
+    | '/benchmarks'
+    | '/vs/helicone'
+    | '/vs/litellm'
+    | '/vs/openrouter'
+    | '/vs/vercel-ai-gateway'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BenchmarksRoute: typeof BenchmarksRoute
+  VsHeliconeRoute: typeof VsHeliconeRoute
+  VsLitellmRoute: typeof VsLitellmRoute
+  VsOpenrouterRoute: typeof VsOpenrouterRoute
+  VsVercelAiGatewayRoute: typeof VsVercelAiGatewayRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/benchmarks': {
       id: '/benchmarks'
       path: '/benchmarks'
@@ -58,11 +124,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BenchmarksRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/vs/helicone': {
+      id: '/vs/helicone'
+      path: '/vs/helicone'
+      fullPath: '/vs/helicone'
+      preLoaderRoute: typeof VsHeliconeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vs/litellm': {
+      id: '/vs/litellm'
+      path: '/vs/litellm'
+      fullPath: '/vs/litellm'
+      preLoaderRoute: typeof VsLitellmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vs/openrouter': {
+      id: '/vs/openrouter'
+      path: '/vs/openrouter'
+      fullPath: '/vs/openrouter'
+      preLoaderRoute: typeof VsOpenrouterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vs/vercel-ai-gateway': {
+      id: '/vs/vercel-ai-gateway'
+      path: '/vs/vercel-ai-gateway'
+      fullPath: '/vs/vercel-ai-gateway'
+      preLoaderRoute: typeof VsVercelAiGatewayRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -71,6 +158,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BenchmarksRoute: BenchmarksRoute,
+  VsHeliconeRoute: VsHeliconeRoute,
+  VsLitellmRoute: VsLitellmRoute,
+  VsOpenrouterRoute: VsOpenrouterRoute,
+  VsVercelAiGatewayRoute: VsVercelAiGatewayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
