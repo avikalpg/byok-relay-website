@@ -195,16 +195,19 @@ export function VsPage({ competitor, verdict, rows, faq }: VsPageProps) {
             <table className="w-full min-w-[600px] border-collapse">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="px-5 py-4 text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground w-1/3">
+                  <th
+                    scope="col"
+                    className="px-5 py-4 text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground w-1/3"
+                  >
                     Capability
                   </th>
-                  <th className="bg-signal/[0.05] px-5 py-4 text-left w-1/3">
+                  <th scope="col" className="bg-signal/[0.05] px-5 py-4 text-left w-1/3">
                     <div className="font-mono text-sm font-medium">byok-relay</div>
                     <div className="font-mono text-[10px] uppercase tracking-widest text-signal">
                       open-source
                     </div>
                   </th>
-                  <th className="px-5 py-4 text-left w-1/3">
+                  <th scope="col" className="px-5 py-4 text-left w-1/3">
                     <div className="font-mono text-sm font-medium text-muted-foreground">
                       {competitor.name}
                     </div>
