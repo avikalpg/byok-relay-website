@@ -32,6 +32,26 @@ function stripTags(html: string): string {
   );
 }
 
+/** Convert complete HTML list blocks to markdown while preserving ordered counters. */
+function convertLists(html: string): string {
+  return html.replace(/<(ul|ol)\b[^>]*>([\s\S]*?)<\/\1>/gi, (_, tag: string, content: string) => {
+    const ordered = tag.toLowerCase() === "ol";
+    let index = 0;
+    const items: string[] = [];
+
+    content.replace(/<li\b[^>]*>([\s\S]*?)<\/li>/gi, (_li, item: string) => {
+      const text = stripTags(item).trim();
+      if (!text) return "";
+
+      index += 1;
+      items.push(`${ordered ? `${index}.` : "-"} ${text}`);
+      return "";
+    });
+
+    return items.length > 0 ? `\n${items.join("\n")}\n` : "\n";
+  });
+}
+
 /**
  * Minimal HTML → Markdown converter.
  * Regex-only, zero dependencies, safe for Cloudflare Workers.
@@ -39,35 +59,36 @@ function stripTags(html: string): string {
  *
  * Known limitations (tracked as GitHub issues):
  *   - <img> tags are stripped rather than converted to ![alt](src)
- *   - <ol> items render as unordered lists (stateful counter needed for 1. 2. 3.)
  *   - <table> content is stripped to plain text
  */
 export function htmlToMarkdown(html: string): string {
+  const markdownWithConvertedInlineElements = html
+    // ── Remove entire elements agents don't need ──
+    .replace(/<(script|style|nav|footer|head)[^>]*>[\s\S]*?<\/\1>/gi, "")
+    // ── Headings ──
+    .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, c) => `\n# ${stripTags(c)}\n`)
+    .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, c) => `\n## ${stripTags(c)}\n`)
+    .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, c) => `\n### ${stripTags(c)}\n`)
+    .replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, (_, c) => `\n#### ${stripTags(c)}\n`)
+    .replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, (_, c) => `\n##### ${stripTags(c)}\n`)
+    .replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, (_, c) => `\n###### ${stripTags(c)}\n`)
+    // ── Links ── (React always quotes attributes, so single/double quotes suffice)
+    .replace(
+      /<a[^>]+href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi,
+      (_, href, text) => `[${stripTags(text)}](${href})`,
+    )
+    // ── Inline formatting ──
+    .replace(/<(strong|b)[^>]*>([\s\S]*?)<\/\1>/gi, (_, _t, c) => `**${stripTags(c)}**`)
+    .replace(/<(em|i)[^>]*>([\s\S]*?)<\/\1>/gi, (_, _t, c) => `_${stripTags(c)}_`)
+    // ── Code blocks (before inline code) ──
+    .replace(
+      /<pre[^>]*>\s*<code[^>]*>([\s\S]*?)<\/code>\s*<\/pre>/gi,
+      (_, c) => `\n\`\`\`\n${decodeEntities(c).trim()}\n\`\`\`\n`,
+    )
+    .replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, (_, c) => `\`${decodeEntities(c).trim()}\``);
+
   return (
-    html
-      // ── Remove entire elements agents don't need ──
-      .replace(/<(script|style|nav|footer|head)[^>]*>[\s\S]*?<\/\1>/gi, "")
-      // ── Headings ──
-      .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, c) => `\n# ${stripTags(c)}\n`)
-      .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, c) => `\n## ${stripTags(c)}\n`)
-      .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, c) => `\n### ${stripTags(c)}\n`)
-      .replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, (_, c) => `\n#### ${stripTags(c)}\n`)
-      .replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, (_, c) => `\n##### ${stripTags(c)}\n`)
-      .replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, (_, c) => `\n###### ${stripTags(c)}\n`)
-      // ── Links ── (React always quotes attributes, so single/double quotes suffice)
-      .replace(
-        /<a[^>]+href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi,
-        (_, href, text) => `[${stripTags(text)}](${href})`,
-      )
-      // ── Inline formatting ──
-      .replace(/<(strong|b)[^>]*>([\s\S]*?)<\/\1>/gi, (_, _t, c) => `**${stripTags(c)}**`)
-      .replace(/<(em|i)[^>]*>([\s\S]*?)<\/\1>/gi, (_, _t, c) => `_${stripTags(c)}_`)
-      // ── Code blocks (before inline code) ──
-      .replace(
-        /<pre[^>]*>\s*<code[^>]*>([\s\S]*?)<\/code>\s*<\/pre>/gi,
-        (_, c) => `\n\`\`\`\n${decodeEntities(c).trim()}\n\`\`\`\n`,
-      )
-      .replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, (_, c) => `\`${decodeEntities(c).trim()}\``)
+    convertLists(markdownWithConvertedInlineElements)
       // ── Lists ──
       .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, c) => `- ${stripTags(c).trim()}\n`)
       .replace(/<\/(ul|ol)>/gi, "\n")
