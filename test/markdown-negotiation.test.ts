@@ -19,3 +19,11 @@ assert.doesNotMatch(converted, /missing-alt\.png/);
 
 const escapedAlt = htmlToMarkdown('<img src="/brackets.png" alt="Chart [p99] \\ view" />');
 assert.equal(escapedAlt, "![Chart \\[p99\\] \\\\ view](/brackets.png)");
+
+const exactAttributeNames = htmlToMarkdown(
+  '<img data-src="/lazy.png" alt="show src=/fake.png" src="/real.png" />',
+);
+assert.equal(exactAttributeNames, "![show src=/fake.png](/real.png)");
+
+const headingImage = htmlToMarkdown('<h1><img alt="Chart" src="/chart.png"></h1>');
+assert.match(headingImage, /!\[Chart\]\(\/chart\.png\)/);

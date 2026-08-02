@@ -33,9 +33,11 @@ function stripTags(html: string): string {
 }
 
 function getHtmlAttribute(tag: string, name: string): string | null {
-  const match = tag.match(new RegExp(`${name}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s>]+))`, "i"));
-  if (!match) return null;
-  return decodeEntities(match[2] ?? match[3] ?? match[4] ?? "").trim();
+  for (const match of tag.matchAll(/\s+([^\s=/>]+)\s*(?:=\s*("([^"]*)"|'([^']*)'|([^\s>]+)))?/g)) {
+    if (match[1].toLowerCase() !== name.toLowerCase()) continue;
+    return decodeEntities(match[3] ?? match[4] ?? match[5] ?? "").trim();
+  }
+  return null;
 }
 
 function escapeMarkdownImageAlt(alt: string): string {
@@ -69,6 +71,8 @@ export function htmlToMarkdown(html: string): string {
     html
       // ── Remove entire elements agents don't need ──
       .replace(/<(script|style|nav|footer|head)[^>]*>[\s\S]*?<\/\1>/gi, "")
+      // ── Images ── (before headings or generic tag stripping)
+      .replace(/<img\b[^>]*\/?>/gi, (tag) => imageTagToMarkdown(tag))
       // ── Headings ──
       .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, c) => `\n# ${stripTags(c)}\n`)
       .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, c) => `\n## ${stripTags(c)}\n`)
@@ -76,8 +80,6 @@ export function htmlToMarkdown(html: string): string {
       .replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, (_, c) => `\n#### ${stripTags(c)}\n`)
       .replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, (_, c) => `\n##### ${stripTags(c)}\n`)
       .replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, (_, c) => `\n###### ${stripTags(c)}\n`)
-      // ── Images ── (before generic tag stripping; decorative images stay omitted)
-      .replace(/<img\b[^>]*\/?>/gi, (tag) => imageTagToMarkdown(tag))
       // ── Links ── (React always quotes attributes, so single/double quotes suffice)
       .replace(
         /<a[^>]+href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi,
