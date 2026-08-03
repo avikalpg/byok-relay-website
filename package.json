@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "prebuild": "curl -sfS --max-time 30 https://raw.githubusercontent.com/avikalpg/byok-relay/main/skills/byok-relay/SKILL.md -o public/skill || echo \"⚠ skill sync failed, using existing public/skill\""
+    "prebuild": "curl -sfS --max-time 30 https://raw.githubusercontent.com/avikalpg/byok-relay/main/skills/byok-relay/SKILL.md -o public/skill || echo \"⚠ skill sync failed, using existing public/skill\"",
+    "test": "node --test test/markdown-negotiation.test.cjs"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",

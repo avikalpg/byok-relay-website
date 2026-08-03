@@ -32,6 +32,46 @@ function stripTags(html: string): string {
   );
 }
 
+/** Escape text for safe use inside a markdown table cell. */
+function escapeTableCell(text: string): string {
+  return text
+    .replace(/\|/g, "\\|")
+    .replace(/\r?\n+/g, "<br>")
+    .trim();
+}
+
+/** Convert a single HTML table into markdown table syntax. */
+function tableToMarkdown(tableHtml: string): string {
+  const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)]
+    .map(([, rowHtml]) =>
+      [...rowHtml.matchAll(/<(th|td)[^>]*>([\s\S]*?)<\/\1>/gi)].map(([, tag, cellHtml]) => ({
+        tag: tag.toLowerCase(),
+        text: escapeTableCell(stripTags(cellHtml)),
+      })),
+    )
+    .filter((row) => row.some((cell) => cell.text.length > 0));
+
+  if (rows.length === 0) return "";
+
+  const hasHeader = rows[0].some((cell) => cell.tag === "th");
+  const columnCount = Math.max(...rows.map((row) => row.length));
+  const headerCells = hasHeader
+    ? rows[0]
+    : Array.from({ length: columnCount }, (_, i) => ({ tag: "th", text: `Column ${i + 1}` }));
+  const bodyRows = hasHeader ? rows.slice(1) : rows;
+
+  const renderRow = (row: { text: string }[]) => {
+    const padded = Array.from({ length: columnCount }, (_, i) => row[i]?.text ?? "");
+    return `| ${padded.join(" | ")} |`;
+  };
+
+  return [
+    renderRow(headerCells),
+    `| ${Array(columnCount).fill("---").join(" | ")} |`,
+    ...bodyRows.map(renderRow),
+  ].join("\n");
+}
+
 /**
  * Minimal HTML → Markdown converter.
  * Regex-only, zero dependencies, safe for Cloudflare Workers.
@@ -40,7 +80,6 @@ function stripTags(html: string): string {
  * Known limitations (tracked as GitHub issues):
  *   - <img> tags are stripped rather than converted to ![alt](src)
  *   - <ol> items render as unordered lists (stateful counter needed for 1. 2. 3.)
- *   - <table> content is stripped to plain text
  */
 export function htmlToMarkdown(html: string): string {
   return (
@@ -54,6 +93,8 @@ export function htmlToMarkdown(html: string): string {
       .replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, (_, c) => `\n#### ${stripTags(c)}\n`)
       .replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, (_, c) => `\n##### ${stripTags(c)}\n`)
       .replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, (_, c) => `\n###### ${stripTags(c)}\n`)
+      // ── Tables ──
+      .replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (match) => `\n${tableToMarkdown(match)}\n`)
       // ── Links ── (React always quotes attributes, so single/double quotes suffice)
       .replace(
         /<a[^>]+href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi,
