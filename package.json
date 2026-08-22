@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "prebuild": "curl -sfS --max-time 30 https://raw.githubusercontent.com/avikalpg/byok-relay/main/skills/byok-relay/SKILL.md -o public/skill || echo \"⚠ skill sync failed, using existing public/skill\""
+    "prebuild": "node scripts/sync-agent-docs.mjs",
+    "sync:agent-docs": "node scripts/sync-agent-docs.mjs",
+    "check:agent-docs": "node scripts/sync-agent-docs.mjs --check",
+    "test": "npm run check:agent-docs"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",

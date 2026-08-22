@@ -34,6 +34,19 @@ function withWellKnownContentType(request: Request, response: Response): Respons
   return response;
 }
 
+/** Ensure static agent-facing markdown files are served with markdown content types. */
+function withAgentDocContentType(request: Request, response: Response): Response {
+  if (response.status !== 200) return response;
+
+  const url = new URL(request.url);
+  const markdownPaths = new Set(["/skill", "/skill.md", "/llms.txt"]);
+  if (!markdownPaths.has(url.pathname)) return response;
+
+  const headers = new Headers(response.headers);
+  headers.set("content-type", "text/markdown; charset=utf-8");
+  return new Response(response.body, { status: response.status, headers });
+}
+
 /** Attach agent-discovery Link headers to any HTML response. */
 function withLinkHeaders(response: Response): Response {
   const ct = response.headers.get("content-type") ?? "";
@@ -121,7 +134,9 @@ export default {
 
       const response = await handler.fetch(request, env, ctx);
       const normalized = await normalizeCatastrophicSsrResponse(response);
-      return withLinkHeaders(withWellKnownContentType(request, normalized));
+      return withLinkHeaders(
+        withAgentDocContentType(request, withWellKnownContentType(request, normalized)),
+      );
     } catch (error) {
       console.error(error);
       return withLinkHeaders(brandedErrorResponse());

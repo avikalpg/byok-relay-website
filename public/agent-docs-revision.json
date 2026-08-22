@@ -1,0 +1,25 @@
+{
+  "generatedBy": "scripts/sync-agent-docs.mjs",
+  "sourceRepo": "https://github.com/avikalpg/byok-relay",
+  "sourceRef": "main",
+  "sourceRevision": "d70b93dc73a38f1c2108be8502e024072a52c016",
+  "files": {
+    "skill": {
+      "sourcePath": "skills/byok-relay/SKILL.md",
+      "sha256": "688d943e98654e3dd6fd0e4207e779601ea1851e8de88cfce5eb1bd4cf56e364",
+      "destinations": [
+        "/skill",
+        "/skill.md"
+      ],
+      "contentType": "text/markdown; charset=utf-8"
+    },
+    "llms": {
+      "sourcePath": "llms.txt",
+      "sha256": "aa76a9c498449e04e72e338e3046c31c4ec954aac80183d5d9205292bde61e1e",
+      "destinations": [
+        "/llms.txt"
+      ],
+      "contentType": "text/markdown; charset=utf-8"
+    }
+  }
+}
