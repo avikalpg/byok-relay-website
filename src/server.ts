@@ -23,6 +23,25 @@ const AGENT_DISCOVERY_LINK_HEADER =
  */
 function withWellKnownContentType(request: Request, response: Response): Response {
   const url = new URL(request.url);
+
+  if ((url.pathname === "/skill" || url.pathname === "/skill.md") && response.status === 200) {
+    const ct = response.headers.get("content-type") ?? "";
+    if (!ct.includes("text/markdown")) {
+      const headers = new Headers(response.headers);
+      headers.set("content-type", "text/markdown; charset=utf-8");
+      return new Response(response.body, { status: response.status, headers });
+    }
+  }
+
+  if (url.pathname === "/llms.txt" && response.status === 200) {
+    const ct = response.headers.get("content-type") ?? "";
+    if (!ct.includes("text/plain")) {
+      const headers = new Headers(response.headers);
+      headers.set("content-type", "text/plain; charset=utf-8");
+      return new Response(response.body, { status: response.status, headers });
+    }
+  }
+
   if (url.pathname === "/.well-known/api-catalog" && response.status === 200) {
     const ct = response.headers.get("content-type") ?? "";
     if (!ct.includes("application/linkset+json")) {
