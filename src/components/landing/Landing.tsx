@@ -570,7 +570,7 @@ function Compare() {
   const rows: { label: string; values: (boolean | "warn" | string)[] }[] = [
     { label: "Who holds the API keys", values: ["Your users", "OpenRouter", "Your org"] },
     { label: "Who pays for AI usage", values: ["Your users", "You (the dev)", "You (the org)"] },
-    { label: "BYOK for end-users", values: [true, false, false] },
+    { label: "Direct first-party provider BYOK", values: [true, "Via OR account", false] },
     { label: "Browser-safe (CORS handled)", values: [true, true, "warn"] },
     { label: "Self-hosted", values: [true, false, true] },
     { label: "Open source", values: ["Apache 2.0", false, true] },
