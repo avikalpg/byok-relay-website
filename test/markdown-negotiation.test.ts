@@ -64,7 +64,14 @@ assert.equal(
   htmlToMarkdown(
     "<ol><li>Install the relay<ol><li>Create a token</li><li>Set the endpoint<ul><li>Keep the key client-side</li></ul></li></ol></li><li>Send a request</li></ol>",
   ),
-  "1. Install the relay\n  1. Create a token\n  2. Set the endpoint\n    - Keep the key client-side\n2. Send a request",
+  "1. Install the relay\n   1. Create a token\n   2. Set the endpoint\n      - Keep the key client-side\n2. Send a request",
+);
+
+assert.equal(
+  htmlToMarkdown(
+    "<ol><li>One</li><li>Two</li><li>Three</li><li>Four</li><li>Five</li><li>Six</li><li>Seven</li><li>Eight</li><li>Nine</li><li>Ten<ul><li>Nested under a two-digit marker</li></ul></li></ol>",
+  ),
+  "1. One\n2. Two\n3. Three\n4. Four\n5. Five\n6. Six\n7. Seven\n8. Eight\n9. Nine\n10. Ten\n    - Nested under a two-digit marker",
 );
 
 assert.equal(prefersMarkdown(requestWithAccept("text/markdown, text/html;q=0.9")), true);

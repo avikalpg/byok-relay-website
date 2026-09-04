@@ -98,14 +98,14 @@ function directListItems(content: string): string[] {
   return items;
 }
 
-function listItemToMarkdown(item: string, depth: number): string {
+function listItemToMarkdown(item: string, nestedIndent: string): string {
   const nestedList = /<(ul|ol)\b[^>]*>/i.exec(item);
   const text = stripTags(nestedList ? item.slice(0, nestedList.index) : item).trim();
-  const nested = nestedList ? convertListBlock(item.slice(nestedList.index!), depth + 1) : "";
+  const nested = nestedList ? convertListBlock(item.slice(nestedList.index!), nestedIndent) : "";
   return [text, nested].filter(Boolean).join("\n");
 }
 
-function convertListBlock(html: string, depth = 0): string {
+function convertListBlock(html: string, indent = ""): string {
   const open = /<(ul|ol)\b[^>]*>/i.exec(html);
   if (!open) return "";
   const tag = open[1].toLowerCase();
@@ -114,13 +114,13 @@ function convertListBlock(html: string, depth = 0): string {
   if (closingTagEnd === null) return stripTags(html);
 
   const closingStart = html.lastIndexOf("</", closingTagEnd);
-  const indent = "  ".repeat(depth);
   let index = 0;
   const lines = directListItems(html.slice(openTagEnd, closingStart)).flatMap((item) => {
-    const text = listItemToMarkdown(item, depth);
-    if (!text) return [];
     index += 1;
-    return `${indent}${tag === "ol" ? `${index}.` : "-"} ${text}`;
+    const marker = `${tag === "ol" ? `${index}.` : "-"} `;
+    const text = listItemToMarkdown(item, " ".repeat(indent.length + marker.length));
+    if (!text) return [];
+    return `${indent}${marker}${text}`;
   });
 
   return lines.join("\n");
