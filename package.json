@@ -4,6 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "test": "node --experimental-strip-types test/markdown-negotiation.test.ts",
     "dev": "vite dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
@@ -11,6 +12,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "prebuild": "curl -sfS --max-time 30 https://raw.githubusercontent.com/avikalpg/byok-relay/main/skills/byok-relay/SKILL.md -o public/skill || echo \"⚠ skill sync failed, using existing public/skill\""
+  },
+  "engines": {
+    "node": ">=22.6.0"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",

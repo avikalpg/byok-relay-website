@@ -32,13 +32,37 @@ function stripTags(html: string): string {
   );
 }
 
+function getHtmlAttribute(tag: string, name: string): string | null {
+  for (const match of tag.matchAll(/\s+([^\s=/>]+)\s*(?:=\s*("([^"]*)"|'([^']*)'|([^\s>]+)))?/g)) {
+    if (match[1].toLowerCase() !== name.toLowerCase()) continue;
+    return decodeEntities(match[3] ?? match[4] ?? match[5] ?? "").trim();
+  }
+  return null;
+}
+
+function escapeMarkdownImageAlt(alt: string): string {
+  return alt
+    .replace(/[[\]\\]/g, "\\$&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function imageTagToMarkdown(tag: string): string {
+  const src = getHtmlAttribute(tag, "src");
+  const alt = getHtmlAttribute(tag, "alt");
+
+  // Images without useful alt text add noise to agent-facing markdown, so keep
+  // the prior behaviour for decorative images while preserving meaningful ones.
+  if (!src || !alt) return "";
+  return `![${escapeMarkdownImageAlt(alt)}](${src})\n`;
+}
+
 /**
  * Minimal HTML → Markdown converter.
  * Regex-only, zero dependencies, safe for Cloudflare Workers.
  * Covers the common patterns found in a TanStack Start marketing site.
  *
  * Known limitations (tracked as GitHub issues):
- *   - <img> tags are stripped rather than converted to ![alt](src)
  *   - <ol> items render as unordered lists (stateful counter needed for 1. 2. 3.)
  *   - <table> content is stripped to plain text
  */
@@ -47,6 +71,8 @@ export function htmlToMarkdown(html: string): string {
     html
       // ── Remove entire elements agents don't need ──
       .replace(/<(script|style|nav|footer|head)[^>]*>[\s\S]*?<\/\1>/gi, "")
+      // ── Images ── (before headings or generic tag stripping)
+      .replace(/<img\b[^>]*\/?>/gi, (tag) => imageTagToMarkdown(tag))
       // ── Headings ──
       .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, c) => `\n# ${stripTags(c)}\n`)
       .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, c) => `\n## ${stripTags(c)}\n`)
