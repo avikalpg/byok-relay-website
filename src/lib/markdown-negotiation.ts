@@ -57,24 +57,94 @@ function imageTagToMarkdown(tag: string): string {
   return `![${escapeMarkdownImageAlt(alt)}](${src})\n`;
 }
 
-/** Convert complete HTML list blocks to markdown while preserving ordered counters. */
-function convertLists(html: string): string {
-  return html.replace(/<(ul|ol)\b[^>]*>([\s\S]*?)<\/\1>/gi, (_, tag: string, content: string) => {
-    const ordered = tag.toLowerCase() === "ol";
-    let index = 0;
-    const items: string[] = [];
+function findClosingTag(html: string, openTagEnd: number, tag: string): number | null {
+  const tags = new RegExp(`<\\/?${tag}\\b[^>]*>`, "gi");
+  tags.lastIndex = openTagEnd;
+  let depth = 1;
 
-    content.replace(/<li\b[^>]*>([\s\S]*?)<\/li>/gi, (_li, item: string) => {
-      const text = stripTags(item).trim();
-      if (!text) return "";
+  for (const match of html.matchAll(tags)) {
+    if (match[0].startsWith("</")) depth -= 1;
+    else depth += 1;
+    if (depth === 0) return match.index! + match[0].length;
+  }
+  return null;
+}
 
-      index += 1;
-      items.push(`${ordered ? `${index}.` : "-"} ${text}`);
-      return "";
-    });
+function directListItems(content: string): string[] {
+  const items: string[] = [];
+  const tags = /<\/?(?:ul|ol|li)\b[^>]*>/gi;
+  let listDepth = 0;
+  let itemStart: number | null = null;
 
-    return items.length > 0 ? `\n${items.join("\n")}\n` : "\n";
+  for (const match of content.matchAll(tags)) {
+    const token = match[0].toLowerCase();
+    const isClosing = token.startsWith("</");
+    const tag = token.match(/^<\/?(ul|ol|li)\b/)?.[1];
+    if (!tag) continue;
+
+    if (tag === "ul" || tag === "ol") {
+      listDepth += isClosing ? -1 : 1;
+      continue;
+    }
+
+    if (listDepth !== 0) continue;
+    if (!isClosing) itemStart = match.index! + match[0].length;
+    else if (itemStart !== null) {
+      items.push(content.slice(itemStart, match.index));
+      itemStart = null;
+    }
+  }
+
+  return items;
+}
+
+function listItemToMarkdown(item: string, depth: number): string {
+  const nestedList = /<(ul|ol)\b[^>]*>/i.exec(item);
+  const text = stripTags(nestedList ? item.slice(0, nestedList.index) : item).trim();
+  const nested = nestedList ? convertListBlock(item.slice(nestedList.index!), depth + 1) : "";
+  return [text, nested].filter(Boolean).join("\n");
+}
+
+function convertListBlock(html: string, depth = 0): string {
+  const open = /<(ul|ol)\b[^>]*>/i.exec(html);
+  if (!open) return "";
+  const tag = open[1].toLowerCase();
+  const openTagEnd = open.index! + open[0].length;
+  const closingTagEnd = findClosingTag(html, openTagEnd, tag);
+  if (closingTagEnd === null) return stripTags(html);
+
+  const closingStart = html.lastIndexOf("</", closingTagEnd);
+  const indent = "  ".repeat(depth);
+  let index = 0;
+  const lines = directListItems(html.slice(openTagEnd, closingStart)).flatMap((item) => {
+    const text = listItemToMarkdown(item, depth);
+    if (!text) return [];
+    index += 1;
+    return `${indent}${tag === "ol" ? `${index}.` : "-"} ${text}`;
   });
+
+  return lines.join("\n");
+}
+
+/** Convert complete HTML list blocks to markdown while preserving nested hierarchy. */
+function convertLists(html: string): string {
+  let result = "";
+  let cursor = 0;
+  const listOpen = /<(ul|ol)\b[^>]*>/gi;
+
+  for (const match of html.matchAll(listOpen)) {
+    if (match.index! < cursor) continue;
+    const tag = match[1].toLowerCase();
+    const openTagEnd = match.index! + match[0].length;
+    const closingTagEnd = findClosingTag(html, openTagEnd, tag);
+    if (closingTagEnd === null) continue;
+
+    result += html.slice(cursor, match.index);
+    result += `\n${convertListBlock(html.slice(match.index, closingTagEnd))}\n`;
+    cursor = closingTagEnd;
+  }
+
+  return result + html.slice(cursor);
 }
 
 /**

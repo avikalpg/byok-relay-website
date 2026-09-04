@@ -60,6 +60,13 @@ assert.equal(
   "- Browser-safe\n- Self-hosted",
 );
 
+assert.equal(
+  htmlToMarkdown(
+    "<ol><li>Install the relay<ol><li>Create a token</li><li>Set the endpoint<ul><li>Keep the key client-side</li></ul></li></ol></li><li>Send a request</li></ol>",
+  ),
+  "1. Install the relay\n  1. Create a token\n  2. Set the endpoint\n    - Keep the key client-side\n2. Send a request",
+);
+
 assert.equal(prefersMarkdown(requestWithAccept("text/markdown, text/html;q=0.9")), true);
 assert.equal(prefersMarkdown(requestWithAccept("text/html, text/markdown;q=0.5")), false);
 assert.equal(prefersMarkdown(requestWithAccept("text/html")), false);
