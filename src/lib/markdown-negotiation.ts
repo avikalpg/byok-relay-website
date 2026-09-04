@@ -99,10 +99,31 @@ function directListItems(content: string): string[] {
 }
 
 function listItemToMarkdown(item: string, nestedIndent: string): string {
-  const nestedList = /<(ul|ol)\b[^>]*>/i.exec(item);
-  const text = stripTags(nestedList ? item.slice(0, nestedList.index) : item).trim();
-  const nested = nestedList ? convertListBlock(item.slice(nestedList.index!), nestedIndent) : "";
-  return [text, nested].filter(Boolean).join("\n");
+  const parts: string[] = [];
+  const nestedListOpen = /<(ul|ol)\b[^>]*>/gi;
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+
+  const appendText = (html: string) => {
+    const text = stripTags(html).trim();
+    if (!text) return;
+    parts.push(parts.length === 0 ? text : `${nestedIndent}${text}`);
+  };
+
+  while ((match = nestedListOpen.exec(item)) !== null) {
+    const openTagEnd = match.index + match[0].length;
+    const closingTagEnd = findClosingTag(item, openTagEnd, match[1]);
+    if (closingTagEnd === null) break;
+
+    appendText(item.slice(cursor, match.index));
+    const nested = convertListBlock(item.slice(match.index, closingTagEnd), nestedIndent);
+    if (nested) parts.push(nested);
+    cursor = closingTagEnd;
+    nestedListOpen.lastIndex = closingTagEnd;
+  }
+
+  appendText(item.slice(cursor));
+  return parts.join("\n");
 }
 
 function convertListBlock(html: string, indent = ""): string {
