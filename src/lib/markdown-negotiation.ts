@@ -32,11 +32,27 @@ function stripTags(html: string): string {
   );
 }
 
+/** Strip table-cell tags while preserving line boundaries, then decode entities. */
+function stripTableCellTags(html: string): string {
+  return decodeEntities(
+    html
+      .replace(/<br\s*\/?\s*>/gi, "\n")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/[^\S\r\n]+/g, " ")
+      .replace(/ *\r?\n */g, "\n")
+      .trim(),
+  );
+}
+
+// Kept opaque until the generic HTML conversion has finished processing <br> tags.
+const TABLE_LINE_BREAK = "\u0000table-line-break\u0000";
+
 /** Escape text for safe use inside a markdown table cell. */
 function escapeTableCell(text: string): string {
   return text
+    .replace(/\\/g, "\\\\")
     .replace(/\|/g, "\\|")
-    .replace(/\r?\n+/g, "<br>")
+    .replace(/\r?\n+/g, TABLE_LINE_BREAK)
     .trim();
 }
 
@@ -46,7 +62,7 @@ function tableToMarkdown(tableHtml: string): string {
     .map(([, rowHtml]) =>
       [...rowHtml.matchAll(/<(th|td)[^>]*>([\s\S]*?)<\/\1>/gi)].map(([, tag, cellHtml]) => ({
         tag: tag.toLowerCase(),
-        text: escapeTableCell(stripTags(cellHtml)),
+        text: escapeTableCell(stripTableCellTags(cellHtml)),
       })),
     )
     .filter((row) => row.some((cell) => cell.text.length > 0));
@@ -125,6 +141,7 @@ export function htmlToMarkdown(html: string): string {
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
       .replace(/&nbsp;/g, " ")
+      .replaceAll(TABLE_LINE_BREAK, "<br>")
       // ── Clean up whitespace ──
       .replace(/\n{3,}/g, "\n\n")
       .trim()

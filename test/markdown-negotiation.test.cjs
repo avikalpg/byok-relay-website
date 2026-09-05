@@ -49,12 +49,14 @@ test("htmlToMarkdown creates synthetic headers when a table has only td cells", 
     <table>
       <tr><td>Metric</td><td>Value</td></tr>
       <tr><td>p50</td><td>0.014ms</td></tr>
+      <tr><td>p99</td></tr>
     </table>
   `);
 
   assert.match(markdown, /\| Column 1 \| Column 2 \|/);
   assert.match(markdown, /\| Metric \| Value \|/);
   assert.match(markdown, /\| p50 \| 0.014ms \|/);
+  assert.match(markdown, /\| p99 \|  \|/);
 });
 
 test("htmlToMarkdown escapes pipe characters inside table cells", () => {
@@ -65,5 +67,16 @@ test("htmlToMarkdown escapes pipe characters inside table cells", () => {
     </table>
   `);
 
-  assert.match(markdown, /\| cat a \\| grep b \| Filters & prints \|/);
+  assert.ok(markdown.includes("| cat a \\| grep b | Filters & prints |"));
+});
+
+test("htmlToMarkdown preserves table-cell line breaks and escaped pipes", () => {
+  const markdown = htmlToMarkdown(`
+    <table>
+      <tr><th>Value</th></tr>
+      <tr><td>path \\| command<br>next line</td></tr>
+    </table>
+  `);
+
+  assert.ok(markdown.includes(String.raw`| path \\\| command<br>next line |`));
 });
