@@ -74,6 +74,8 @@ assert.equal(
   "1. One\n2. Two\n3. Three\n4. Four\n5. Five\n6. Six\n7. Seven\n8. Eight\n9. Nine\n10. Ten\n    - Nested under a two-digit marker",
 );
 
+assert.equal(htmlToMarkdown("<ol><li><ul><li>Child</li></ul></li></ol>"), "1. \n   - Child");
+
 assert.equal(
   htmlToMarkdown(
     "<ul><li>Parent<ul><li>Child</li></ul>Tail<ol><li>Later child</li></ol>End</li></ul>",

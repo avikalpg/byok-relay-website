@@ -117,7 +117,7 @@ function listItemToMarkdown(item: string, nestedIndent: string): string {
 
     appendText(item.slice(cursor, match.index));
     const nested = convertListBlock(item.slice(match.index, closingTagEnd), nestedIndent);
-    if (nested) parts.push(nested);
+    if (nested) parts.push(parts.length === 0 ? `\n${nested}` : nested);
     cursor = closingTagEnd;
     nestedListOpen.lastIndex = closingTagEnd;
   }
