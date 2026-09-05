@@ -32,6 +32,62 @@ function stripTags(html: string): string {
   );
 }
 
+/** Strip table-cell tags while preserving line boundaries, then decode entities. */
+function stripTableCellTags(html: string): string {
+  return decodeEntities(
+    html
+      .replace(/<br\s*\/?\s*>/gi, "\n")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/[^\S\r\n]+/g, " ")
+      .replace(/ *\r?\n */g, "\n")
+      .trim(),
+  );
+}
+
+// Kept opaque until the generic HTML conversion has finished processing <br> tags.
+const TABLE_LINE_BREAK = "\u0000table-line-break\u0000";
+
+/** Escape text for safe use inside a markdown table cell. */
+function escapeTableCell(text: string): string {
+  return text
+    .replace(/\\/g, "\\\\")
+    .replace(/\|/g, "\\|")
+    .replace(/\r?\n+/g, TABLE_LINE_BREAK)
+    .trim();
+}
+
+/** Convert a single HTML table into markdown table syntax. */
+function tableToMarkdown(tableHtml: string): string {
+  const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)]
+    .map(([, rowHtml]) =>
+      [...rowHtml.matchAll(/<(th|td)[^>]*>([\s\S]*?)<\/\1>/gi)].map(([, tag, cellHtml]) => ({
+        tag: tag.toLowerCase(),
+        text: escapeTableCell(stripTableCellTags(cellHtml)),
+      })),
+    )
+    .filter((row) => row.some((cell) => cell.text.length > 0));
+
+  if (rows.length === 0) return "";
+
+  const hasHeader = rows[0].some((cell) => cell.tag === "th");
+  const columnCount = Math.max(...rows.map((row) => row.length));
+  const headerCells = hasHeader
+    ? rows[0]
+    : Array.from({ length: columnCount }, (_, i) => ({ tag: "th", text: `Column ${i + 1}` }));
+  const bodyRows = hasHeader ? rows.slice(1) : rows;
+
+  const renderRow = (row: { text: string }[]) => {
+    const padded = Array.from({ length: columnCount }, (_, i) => row[i]?.text ?? "");
+    return `| ${padded.join(" | ")} |`;
+  };
+
+  return [
+    renderRow(headerCells),
+    `| ${Array(columnCount).fill("---").join(" | ")} |`,
+    ...bodyRows.map(renderRow),
+  ].join("\n");
+}
+
 function getHtmlAttribute(tag: string, name: string): string | null {
   for (const match of tag.matchAll(/\s+([^\s=/>]+)\s*(?:=\s*("([^"]*)"|'([^']*)'|([^\s>]+)))?/g)) {
     if (match[1].toLowerCase() !== name.toLowerCase()) continue;
@@ -172,9 +228,6 @@ function convertLists(html: string): string {
  * Minimal HTML → Markdown converter.
  * Regex-only, zero dependencies, safe for Cloudflare Workers.
  * Covers the common patterns found in a TanStack Start marketing site.
- *
- * Known limitations (tracked as GitHub issues):
- *   - <table> content is stripped to plain text
  */
 export function htmlToMarkdown(html: string): string {
   const markdownWithConvertedInlineElements = html
@@ -189,6 +242,8 @@ export function htmlToMarkdown(html: string): string {
     .replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, (_, c) => `\n#### ${stripTags(c)}\n`)
     .replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, (_, c) => `\n##### ${stripTags(c)}\n`)
     .replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, (_, c) => `\n###### ${stripTags(c)}\n`)
+    // ── Tables ──
+    .replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (match) => `\n${tableToMarkdown(match)}\n`)
     // ── Links ── (React always quotes attributes, so single/double quotes suffice)
     .replace(
       /<a[^>]+href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi,
@@ -222,6 +277,7 @@ export function htmlToMarkdown(html: string): string {
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
       .replace(/&nbsp;/g, " ")
+      .replaceAll(TABLE_LINE_BREAK, "<br>")
       // ── Clean up whitespace ──
       .replace(/\n{3,}/g, "\n\n")
       .trim()
