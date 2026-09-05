@@ -88,43 +88,179 @@ function tableToMarkdown(tableHtml: string): string {
   ].join("\n");
 }
 
+function getHtmlAttribute(tag: string, name: string): string | null {
+  for (const match of tag.matchAll(/\s+([^\s=/>]+)\s*(?:=\s*("([^"]*)"|'([^']*)'|([^\s>]+)))?/g)) {
+    if (match[1].toLowerCase() !== name.toLowerCase()) continue;
+    return decodeEntities(match[3] ?? match[4] ?? match[5] ?? "").trim();
+  }
+  return null;
+}
+
+function escapeMarkdownImageAlt(alt: string): string {
+  return alt
+    .replace(/[[\]\\]/g, "\\$&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function imageTagToMarkdown(tag: string): string {
+  const src = getHtmlAttribute(tag, "src");
+  const alt = getHtmlAttribute(tag, "alt");
+
+  // Images without useful alt text add noise to agent-facing markdown, so keep
+  // the prior behaviour for decorative images while preserving meaningful ones.
+  if (!src || !alt) return "";
+  return `![${escapeMarkdownImageAlt(alt)}](${src})\n`;
+}
+
+function findClosingTag(html: string, openTagEnd: number, tag: string): number | null {
+  const tags = new RegExp(`<\\/?${tag}\\b[^>]*>`, "gi");
+  tags.lastIndex = openTagEnd;
+  let depth = 1;
+
+  for (const match of html.matchAll(tags)) {
+    if (match[0].startsWith("</")) depth -= 1;
+    else depth += 1;
+    if (depth === 0) return match.index! + match[0].length;
+  }
+  return null;
+}
+
+function directListItems(content: string): string[] {
+  const items: string[] = [];
+  const tags = /<\/?(?:ul|ol|li)\b[^>]*>/gi;
+  let listDepth = 0;
+  let itemStart: number | null = null;
+
+  for (const match of content.matchAll(tags)) {
+    const token = match[0].toLowerCase();
+    const isClosing = token.startsWith("</");
+    const tag = token.match(/^<\/?(ul|ol|li)\b/)?.[1];
+    if (!tag) continue;
+
+    if (tag === "ul" || tag === "ol") {
+      listDepth += isClosing ? -1 : 1;
+      continue;
+    }
+
+    if (listDepth !== 0) continue;
+    if (!isClosing) itemStart = match.index! + match[0].length;
+    else if (itemStart !== null) {
+      items.push(content.slice(itemStart, match.index));
+      itemStart = null;
+    }
+  }
+
+  return items;
+}
+
+function listItemToMarkdown(item: string, nestedIndent: string): string {
+  const parts: string[] = [];
+  const nestedListOpen = /<(ul|ol)\b[^>]*>/gi;
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+
+  const appendText = (html: string) => {
+    const text = stripTags(html).trim();
+    if (!text) return;
+    parts.push(parts.length === 0 ? text : `${nestedIndent}${text}`);
+  };
+
+  while ((match = nestedListOpen.exec(item)) !== null) {
+    const openTagEnd = match.index + match[0].length;
+    const closingTagEnd = findClosingTag(item, openTagEnd, match[1]);
+    if (closingTagEnd === null) break;
+
+    appendText(item.slice(cursor, match.index));
+    const nested = convertListBlock(item.slice(match.index, closingTagEnd), nestedIndent);
+    if (nested) parts.push(parts.length === 0 ? `\n${nested}` : nested);
+    cursor = closingTagEnd;
+    nestedListOpen.lastIndex = closingTagEnd;
+  }
+
+  appendText(item.slice(cursor));
+  return parts.join("\n");
+}
+
+function convertListBlock(html: string, indent = ""): string {
+  const open = /<(ul|ol)\b[^>]*>/i.exec(html);
+  if (!open) return "";
+  const tag = open[1].toLowerCase();
+  const openTagEnd = open.index! + open[0].length;
+  const closingTagEnd = findClosingTag(html, openTagEnd, tag);
+  if (closingTagEnd === null) return stripTags(html);
+
+  const closingStart = html.lastIndexOf("</", closingTagEnd);
+  let index = 0;
+  const lines = directListItems(html.slice(openTagEnd, closingStart)).flatMap((item) => {
+    index += 1;
+    const marker = `${tag === "ol" ? `${index}.` : "-"} `;
+    const text = listItemToMarkdown(item, " ".repeat(indent.length + marker.length));
+    if (!text) return [];
+    return `${indent}${marker}${text}`;
+  });
+
+  return lines.join("\n");
+}
+
+/** Convert complete HTML list blocks to markdown while preserving nested hierarchy. */
+function convertLists(html: string): string {
+  let result = "";
+  let cursor = 0;
+  const listOpen = /<(ul|ol)\b[^>]*>/gi;
+
+  for (const match of html.matchAll(listOpen)) {
+    if (match.index! < cursor) continue;
+    const tag = match[1].toLowerCase();
+    const openTagEnd = match.index! + match[0].length;
+    const closingTagEnd = findClosingTag(html, openTagEnd, tag);
+    if (closingTagEnd === null) continue;
+
+    result += html.slice(cursor, match.index);
+    result += `\n${convertListBlock(html.slice(match.index, closingTagEnd))}\n`;
+    cursor = closingTagEnd;
+  }
+
+  return result + html.slice(cursor);
+}
+
 /**
  * Minimal HTML → Markdown converter.
  * Regex-only, zero dependencies, safe for Cloudflare Workers.
  * Covers the common patterns found in a TanStack Start marketing site.
- *
- * Known limitations (tracked as GitHub issues):
- *   - <img> tags are stripped rather than converted to ![alt](src)
- *   - <ol> items render as unordered lists (stateful counter needed for 1. 2. 3.)
  */
 export function htmlToMarkdown(html: string): string {
+  const markdownWithConvertedInlineElements = html
+    // ── Remove entire elements agents don't need ──
+    .replace(/<(script|style|nav|footer|head)[^>]*>[\s\S]*?<\/\1>/gi, "")
+    // ── Images ── (before headings or generic tag stripping)
+    .replace(/<img\b[^>]*\/?>/gi, (tag) => imageTagToMarkdown(tag))
+    // ── Headings ──
+    .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, c) => `\n# ${stripTags(c)}\n`)
+    .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, c) => `\n## ${stripTags(c)}\n`)
+    .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, c) => `\n### ${stripTags(c)}\n`)
+    .replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, (_, c) => `\n#### ${stripTags(c)}\n`)
+    .replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, (_, c) => `\n##### ${stripTags(c)}\n`)
+    .replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, (_, c) => `\n###### ${stripTags(c)}\n`)
+    // ── Tables ──
+    .replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (match) => `\n${tableToMarkdown(match)}\n`)
+    // ── Links ── (React always quotes attributes, so single/double quotes suffice)
+    .replace(
+      /<a[^>]+href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi,
+      (_, href, text) => `[${stripTags(text)}](${href})`,
+    )
+    // ── Inline formatting ──
+    .replace(/<(strong|b)[^>]*>([\s\S]*?)<\/\1>/gi, (_, _t, c) => `**${stripTags(c)}**`)
+    .replace(/<(em|i)[^>]*>([\s\S]*?)<\/\1>/gi, (_, _t, c) => `_${stripTags(c)}_`)
+    // ── Code blocks (before inline code) ──
+    .replace(
+      /<pre[^>]*>\s*<code[^>]*>([\s\S]*?)<\/code>\s*<\/pre>/gi,
+      (_, c) => `\n\`\`\`\n${decodeEntities(c).trim()}\n\`\`\`\n`,
+    )
+    .replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, (_, c) => `\`${decodeEntities(c).trim()}\``);
+
   return (
-    html
-      // ── Remove entire elements agents don't need ──
-      .replace(/<(script|style|nav|footer|head)[^>]*>[\s\S]*?<\/\1>/gi, "")
-      // ── Headings ──
-      .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, c) => `\n# ${stripTags(c)}\n`)
-      .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, c) => `\n## ${stripTags(c)}\n`)
-      .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, c) => `\n### ${stripTags(c)}\n`)
-      .replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, (_, c) => `\n#### ${stripTags(c)}\n`)
-      .replace(/<h5[^>]*>([\s\S]*?)<\/h5>/gi, (_, c) => `\n##### ${stripTags(c)}\n`)
-      .replace(/<h6[^>]*>([\s\S]*?)<\/h6>/gi, (_, c) => `\n###### ${stripTags(c)}\n`)
-      // ── Tables ──
-      .replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (match) => `\n${tableToMarkdown(match)}\n`)
-      // ── Links ── (React always quotes attributes, so single/double quotes suffice)
-      .replace(
-        /<a[^>]+href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi,
-        (_, href, text) => `[${stripTags(text)}](${href})`,
-      )
-      // ── Inline formatting ──
-      .replace(/<(strong|b)[^>]*>([\s\S]*?)<\/\1>/gi, (_, _t, c) => `**${stripTags(c)}**`)
-      .replace(/<(em|i)[^>]*>([\s\S]*?)<\/\1>/gi, (_, _t, c) => `_${stripTags(c)}_`)
-      // ── Code blocks (before inline code) ──
-      .replace(
-        /<pre[^>]*>\s*<code[^>]*>([\s\S]*?)<\/code>\s*<\/pre>/gi,
-        (_, c) => `\n\`\`\`\n${decodeEntities(c).trim()}\n\`\`\`\n`,
-      )
-      .replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, (_, c) => `\`${decodeEntities(c).trim()}\``)
+    convertLists(markdownWithConvertedInlineElements)
       // ── Lists ──
       .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, c) => `- ${stripTags(c).trim()}\n`)
       .replace(/<\/(ul|ol)>/gi, "\n")
