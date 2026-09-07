@@ -1,18 +1,18 @@
 {
   "canonicalSkillRepo": "avikalpg/byok-relay",
-  "canonicalSkillRef": "main",
-  "canonicalSkillCommit": "be96dc633c1b5b9d670fcb74c43cde02662ebadf",
-  "syncedAt": "2026-08-28T03:38:56.570Z",
+  "canonicalSkillRef": "fix/skill-eventsource-readablestream-2026-09-07",
+  "canonicalSkillCommit": "64139a2f3d723511ad879169f0c0adbfdf273a09",
+  "syncedAt": "2026-09-07T03:35:50.589Z",
   "files": [
     {
       "source": "avikalpg/byok-relay/skills/byok-relay/SKILL.md",
       "destination": "skill",
-      "sha256": "688d943e98654e3dd6fd0e4207e779601ea1851e8de88cfce5eb1bd4cf56e364"
+      "sha256": "bde3ad4d1ae49074a8d79538261f463aba61dfef61b1cf96e16fd3ad1ce2e01d"
     },
     {
       "source": "avikalpg/byok-relay/skills/byok-relay/SKILL.md",
       "destination": "skill.md",
-      "sha256": "688d943e98654e3dd6fd0e4207e779601ea1851e8de88cfce5eb1bd4cf56e364"
+      "sha256": "bde3ad4d1ae49074a8d79538261f463aba61dfef61b1cf96e16fd3ad1ce2e01d"
     },
     {
       "source": "public/llms.txt",

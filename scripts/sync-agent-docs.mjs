@@ -4,7 +4,6 @@ import path from "node:path";
 
 const SOURCE_REPO = "avikalpg/byok-relay";
 const SOURCE_REF = process.env.BYOK_RELAY_AGENT_DOCS_REF || "main";
-const RAW_BASE = `https://raw.githubusercontent.com/${SOURCE_REPO}/${SOURCE_REF}`;
 const API_COMMIT_URL = `https://api.github.com/repos/${SOURCE_REPO}/commits/${SOURCE_REF}`;
 const CHECK = process.argv.includes("--check");
 const ROOT = process.cwd();
@@ -93,7 +92,18 @@ async function assertMatches(destination, expected) {
 async function main() {
   await mkdir(PUBLIC_DIR, { recursive: true });
   const sourceCommit = await fetchSourceCommit();
-  const skillText = await fetchText(`${RAW_BASE}/${canonicalSkill.sourcePath}`);
+  // Always fetch the skill from the resolved commit SHA so the manifest and
+  // downloaded content are guaranteed to be aligned, even when SOURCE_REF is a
+  // mutable pointer such as "main" that can advance between resolution and fetch.
+  if (sourceCommit === SOURCE_REF) {
+    // Could not resolve SHA — fail fast rather than recording a mismatched manifest.
+    throw new Error(
+      `Could not resolve commit SHA for ${SOURCE_REPO}@${SOURCE_REF}. ` +
+      `Check network connectivity or BYOK_RELAY_AGENT_DOCS_REF env var.`,
+    );
+  }
+  const RAW_SHA_BASE = `https://raw.githubusercontent.com/${SOURCE_REPO}/${sourceCommit}`;
+  const skillText = await fetchText(`${RAW_SHA_BASE}/${canonicalSkill.sourcePath}`);
   validateSkill(skillText);
 
   const manifestFiles = [];
@@ -134,6 +144,53 @@ async function main() {
     );
     console.log(`Synced skill docs from ${SOURCE_REPO}@${sourceCommit}`);
   } else {
+    // Validate the revision manifest so that a deleted or tampered
+    // agent-docs-revision.json is caught even when skill and skill.md match.
+    const manifestPath = path.join(PUBLIC_DIR, "agent-docs-revision.json");
+    let storedManifest;
+    try {
+      storedManifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    } catch (error) {
+      if (error?.code === "ENOENT") {
+        throw new Error(
+          "agent-docs-revision.json is missing; run npm run sync:agent-docs",
+        );
+      }
+      throw error;
+    }
+    const errors = [];
+    if (storedManifest.canonicalSkillRepo !== manifest.canonicalSkillRepo) {
+      errors.push(
+        `canonicalSkillRepo mismatch: stored=${storedManifest.canonicalSkillRepo} expected=${manifest.canonicalSkillRepo}`,
+      );
+    }
+    if (storedManifest.canonicalSkillCommit !== manifest.canonicalSkillCommit) {
+      errors.push(
+        `canonicalSkillCommit mismatch: stored=${storedManifest.canonicalSkillCommit} expected=${manifest.canonicalSkillCommit}`,
+      );
+    }
+    for (const expectedFile of manifest.files) {
+      const stored = (storedManifest.files || []).find(
+        (f) => f.destination === expectedFile.destination,
+      );
+      if (!stored) {
+        errors.push(`manifest missing entry for destination: ${expectedFile.destination}`);
+      } else if (stored.sha256 !== expectedFile.sha256) {
+        errors.push(
+          `sha256 mismatch for ${expectedFile.destination}: stored=${stored.sha256} expected=${expectedFile.sha256}`,
+        );
+      } else if (stored.source !== expectedFile.source) {
+        errors.push(
+          `source mismatch for ${expectedFile.destination}: stored=${stored.source} expected=${expectedFile.source}`,
+        );
+      }
+    }
+    if (errors.length > 0) {
+      throw new Error(
+        `agent-docs-revision.json is stale or tampered; run npm run sync:agent-docs\n  ` +
+          errors.join("\n  "),
+      );
+    }
     console.log(`Agent docs match ${SOURCE_REPO}@${sourceCommit}`);
   }
 }
