@@ -33,11 +33,18 @@ async function fetchSourceCommit() {
         "user-agent": "byok-relay-website-agent-docs-sync",
       },
     });
-    if (!res.ok) return SOURCE_REF;
+    if (!res.ok) {
+      throw new Error(`GitHub returned ${res.status} ${res.statusText}`);
+    }
     const data = await res.json();
-    return typeof data.sha === "string" ? data.sha : SOURCE_REF;
-  } catch {
-    return SOURCE_REF;
+    if (typeof data.sha !== "string" || !/^[0-9a-f]{40}$/i.test(data.sha)) {
+      throw new Error("GitHub response did not contain a full commit SHA");
+    }
+    return data.sha;
+  } catch (error) {
+    throw new Error(
+      `Could not resolve commit SHA for ${SOURCE_REPO}@${SOURCE_REF}: ${error.message}`,
+    );
   }
 }
 
@@ -95,13 +102,6 @@ async function main() {
   // Always fetch the skill from the resolved commit SHA so the manifest and
   // downloaded content are guaranteed to be aligned, even when SOURCE_REF is a
   // mutable pointer such as "main" that can advance between resolution and fetch.
-  if (sourceCommit === SOURCE_REF) {
-    // Could not resolve SHA — fail fast rather than recording a mismatched manifest.
-    throw new Error(
-      `Could not resolve commit SHA for ${SOURCE_REPO}@${SOURCE_REF}. ` +
-      `Check network connectivity or BYOK_RELAY_AGENT_DOCS_REF env var.`,
-    );
-  }
   const RAW_SHA_BASE = `https://raw.githubusercontent.com/${SOURCE_REPO}/${sourceCommit}`;
   const skillText = await fetchText(`${RAW_SHA_BASE}/${canonicalSkill.sourcePath}`);
   validateSkill(skillText);
@@ -152,9 +152,7 @@ async function main() {
       storedManifest = JSON.parse(await readFile(manifestPath, "utf8"));
     } catch (error) {
       if (error?.code === "ENOENT") {
-        throw new Error(
-          "agent-docs-revision.json is missing; run npm run sync:agent-docs",
-        );
+        throw new Error("agent-docs-revision.json is missing; run npm run sync:agent-docs");
       }
       throw error;
     }
@@ -164,15 +162,26 @@ async function main() {
         `canonicalSkillRepo mismatch: stored=${storedManifest.canonicalSkillRepo} expected=${manifest.canonicalSkillRepo}`,
       );
     }
+    if (storedManifest.canonicalSkillRef !== manifest.canonicalSkillRef) {
+      errors.push(
+        `canonicalSkillRef mismatch: stored=${storedManifest.canonicalSkillRef} expected=${manifest.canonicalSkillRef}`,
+      );
+    }
     if (storedManifest.canonicalSkillCommit !== manifest.canonicalSkillCommit) {
       errors.push(
         `canonicalSkillCommit mismatch: stored=${storedManifest.canonicalSkillCommit} expected=${manifest.canonicalSkillCommit}`,
       );
     }
-    for (const expectedFile of manifest.files) {
-      const stored = (storedManifest.files || []).find(
-        (f) => f.destination === expectedFile.destination,
+    const storedFiles = Array.isArray(storedManifest.files) ? storedManifest.files : [];
+    const expectedDestinations = manifest.files.map((file) => file.destination).sort();
+    const storedDestinations = storedFiles.map((file) => file.destination).sort();
+    if (JSON.stringify(storedDestinations) !== JSON.stringify(expectedDestinations)) {
+      errors.push(
+        `destination mismatch: stored=${storedDestinations.join(",")} expected=${expectedDestinations.join(",")}`,
       );
+    }
+    for (const expectedFile of manifest.files) {
+      const stored = storedFiles.find((file) => file.destination === expectedFile.destination);
       if (!stored) {
         errors.push(`manifest missing entry for destination: ${expectedFile.destination}`);
       } else if (stored.sha256 !== expectedFile.sha256) {
