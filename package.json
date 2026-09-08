@@ -4,6 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "test": "node --experimental-strip-types test/markdown-negotiation.test.ts && node --test test/markdown-negotiation.test.cjs",
     "dev": "vite dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
@@ -15,6 +16,9 @@
     "check:agent-docs": "node scripts/sync-agent-docs.mjs --check",
     "test": "npm run test:agent-docs",
     "test:agent-docs": "npm run check:agent-docs"
+  },
+  "engines": {
+    "node": ">=22.6.0"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",
