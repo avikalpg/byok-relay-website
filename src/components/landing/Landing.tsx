@@ -570,7 +570,7 @@ function Compare() {
   const rows: { label: string; values: (boolean | "warn" | string)[] }[] = [
     {
       label: "Who holds workspace-managed provider API keys",
-      values: ["Your users", "Your org", "Your org"],
+      values: ["Your users", "Your workspace", "Your org"],
     },
     { label: "Who pays for AI usage", values: ["Your users", "You (the dev)", "You (the org)"] },
     { label: "Direct first-party provider BYOK", values: [true, "Via OR account", false] },
@@ -668,6 +668,12 @@ function Compare() {
             className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
           >
             byok-relay vs OpenRouter →
+          </a>
+          <a
+            href="https://openrouter.ai/docs/guides/overview/auth/byok"
+            className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+          >
+            OpenRouter BYOK docs →
           </a>
           <a
             href="/vs/litellm"
