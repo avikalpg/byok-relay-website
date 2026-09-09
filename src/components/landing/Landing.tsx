@@ -568,7 +568,10 @@ function Security() {
 
 function Compare() {
   const rows: { label: string; values: (boolean | "warn" | string)[] }[] = [
-    { label: "Who holds the API keys", values: ["Your users", "OpenRouter", "Your org"] },
+    {
+      label: "Who holds workspace-managed provider API keys",
+      values: ["Your users", "Your org", "Your org"],
+    },
     { label: "Who pays for AI usage", values: ["Your users", "You (the dev)", "You (the org)"] },
     { label: "Direct first-party provider BYOK", values: [true, "Via OR account", false] },
     { label: "Browser-safe (CORS handled)", values: [true, true, "warn"] },
