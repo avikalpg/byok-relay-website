@@ -568,9 +568,12 @@ function Security() {
 
 function Compare() {
   const rows: { label: string; values: (boolean | "warn" | string)[] }[] = [
-    { label: "Who holds the API keys", values: ["Your users", "OpenRouter", "Your org"] },
+    {
+      label: "Who holds workspace-managed provider API keys",
+      values: ["Your users", "Your workspace", "Your org"],
+    },
     { label: "Who pays for AI usage", values: ["Your users", "You (the dev)", "You (the org)"] },
-    { label: "BYOK for end-users", values: [true, false, false] },
+    { label: "Direct first-party provider BYOK", values: [true, "Via OR account", false] },
     { label: "Browser-safe (CORS handled)", values: [true, true, "warn"] },
     { label: "Self-hosted", values: [true, false, true] },
     { label: "Open source", values: ["Apache 2.0", false, true] },
@@ -665,6 +668,12 @@ function Compare() {
             className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
           >
             byok-relay vs OpenRouter →
+          </a>
+          <a
+            href="https://openrouter.ai/docs/guides/overview/auth/byok"
+            className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
+          >
+            OpenRouter BYOK docs →
           </a>
           <a
             href="/vs/litellm"

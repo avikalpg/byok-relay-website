@@ -8,10 +8,11 @@ const data: VsPageProps = {
     tagline: "200+ model marketplace",
     url: "https://openrouter.ai",
     description:
-      "OpenRouter is a managed gateway that gives you access to 200+ AI models through a single API. You pay OpenRouter (or set up credit limits), and they handle routing, fallbacks, and usage tracking. Great for developers who want broad model access without managing multiple provider accounts.",
-    bestFor: "Developers who pay for AI and want 200+ models through one API",
+      "OpenRouter is a managed gateway that gives you access to 200+ AI models through a single API. Teams can configure workspace-managed provider API keys, while end users can connect with a user-controlled OpenRouter API key or OAuth/PKCE. You pay OpenRouter (or set up credit limits), and they handle routing, fallbacks, and usage tracking. Great for developers who want broad model access without managing multiple provider accounts.",
+    bestFor:
+      "Developers who want 200+ models, smart routing, and usage analytics through one managed API",
     primaryDiff:
-      "The core difference: OpenRouter manages the API keys and bills you. byok-relay lets your users bring their own keys — so they pay their own provider, and your inference bill stays zero.",
+      "OpenRouter lets users connect with a user-controlled OpenRouter API key or OAuth/PKCE. byok-relay lets users connect existing first-party provider API keys directly inside your product — no OR account, no gateway balance, billed straight to their provider.",
   },
   verdict: {
     headline: "Different tools. Different billing models. Different use cases.",
@@ -27,10 +28,10 @@ const data: VsPageProps = {
       competitor: "You (the developer)",
     },
     {
-      label: "BYOK for end-users",
+      label: "Direct first-party provider BYOK",
       byok: true,
-      competitor: false,
-      note: "Can your app users plug in their own API key?",
+      competitor: "Via OR account",
+      note: "OpenRouter lets users connect with a user-controlled OpenRouter API key. byok-relay connects their existing first-party OpenAI/Anthropic/etc. API keys directly — no OR account required.",
     },
     {
       label: "Zero inference bill",
@@ -114,7 +115,7 @@ export const Route = createFileRoute("/vs/openrouter")({
       {
         property: "og:description",
         content:
-          "OpenRouter bills you for AI usage. byok-relay lets your users bring their own keys — so your inference bill stays zero.",
+          "OpenRouter supports account access alongside workspace provider keys. byok-relay lets users bring first-party provider API keys directly, so your inference bill stays zero.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
